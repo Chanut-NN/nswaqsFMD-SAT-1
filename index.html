@@ -345,7 +345,19 @@ cargoSelect.addEventListener('change', () => {
 const settingsPanel = document.getElementById('settingsPanel');
 const webAppUrlInput = document.getElementById('webAppUrl');
 document.getElementById('btnSettings').addEventListener('click', () => {
-  settingsPanel.classList.toggle('hidden');
+  Swal.fire({
+    icon: 'warning',
+    title: 'ส่วนนี้สำหรับผู้พัฒนาระบบเท่านั้น',
+    text: 'การแก้ไข Web App URL มีผลต่อการบันทึกข้อมูลของทุกคนที่ใช้ระบบนี้ กรุณาดำเนินการต่อเฉพาะกรณีที่ท่านเป็นผู้ดูแล/ผู้พัฒนาระบบเท่านั้น',
+    showCancelButton: true,
+    confirmButtonText: 'ฉันเป็นผู้พัฒนา ดำเนินการต่อ',
+    cancelButtonText: 'ยกเลิก',
+    confirmButtonColor: '#0B4A8F'
+  }).then(res => {
+    if (res.isConfirmed) {
+      settingsPanel.classList.toggle('hidden');
+    }
+  });
 });
 document.getElementById('btnSaveUrl').addEventListener('click', () => {
   const url = webAppUrlInput.value.trim();
@@ -435,6 +447,38 @@ document.getElementById('logForm').addEventListener('submit', async function(e) 
     disinfectionResult: document.getElementById('disinfectionResult').value,
     operatorName: document.getElementById('operatorName').value.trim()
   };
+
+  const cargoDisplay = payload.cargoType === 'อื่นๆ' ? ('อื่นๆ: ' + payload.cargoTypeOther) : payload.cargoType;
+  const resultColor = payload.disinfectionResult === 'พ่นครบตามแผน' ? '#1E8E5A' : '#DC2626';
+
+  const summaryHtml = `
+    <div style="text-align:left;font-size:14px;line-height:1.9">
+      <div><b>ฝั่งด่าน:</b> ${payload.checkpointSide}</div>
+      <div><b>วันที่ปฏิบัติงาน:</b> ${payload.operationDate}</div>
+      <div><b>ประเภทรถ:</b> ${payload.vehicleWheels}</div>
+      <div><b>ทะเบียนรถ:</b> ${payload.licensePlate} (${payload.licenseProvince})</div>
+      <div><b>สิ่งที่ขนส่ง:</b> ${cargoDisplay}</div>
+      <div><b>ต้นทาง → ปลายทาง:</b> ${payload.originProvince} → ${payload.destinationProvince}</div>
+      <div><b>ผลการพ่นน้ำยา:</b> <span style="color:${resultColor};font-weight:700">${payload.disinfectionResult}</span></div>
+      <div><b>ผู้ปฏิบัติงาน:</b> ${payload.operatorName}</div>
+    </div>
+  `;
+
+  const confirmRes = await Swal.fire({
+    icon: 'question',
+    title: 'กรุณาตรวจสอบข้อมูลก่อนบันทึก',
+    html: summaryHtml,
+    showCancelButton: true,
+    confirmButtonText: 'ข้อมูลถูกต้อง ยืนยันบันทึก',
+    cancelButtonText: 'ตรวจสอบอีกครั้ง',
+    confirmButtonColor: '#0B4A8F',
+    cancelButtonColor: '#64748B',
+    reverseButtons: true
+  });
+
+  if (!confirmRes.isConfirmed) {
+    return;
+  }
 
   const btnSubmit = document.getElementById('btnSubmit');
   const btnText = document.getElementById('btnSubmitText');
