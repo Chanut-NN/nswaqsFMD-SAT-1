@@ -108,7 +108,6 @@
   <form id="logForm" class="bg-white rounded-2xl shadow-md border border-slate-200 p-4 sm:p-6 space-y-6">
 
     <!-- ฝั่งด่าน -->
- <!-- ฝั่งด่าน -->
     <div>
       <label class="block text-sm font-bold text-gov-blueDark mb-2">ฝั่งด่านกักกัน <span class="text-red-500">*</span></label>
       <div class="grid grid-cols-2 gap-3">
@@ -281,6 +280,16 @@ const WHEEL_OPTIONS = [4,6,8,10,12,18,20,22,24];
 const URL_KEY = 'qav_webapp_url';
 let sheetDataStore = [];
 
+// ฟังก์ชันดึง Web App URL จาก config.js เป็นหลัก หากไม่มีค่อยดู localStorage
+function getActiveWebAppUrl() {
+  let configUrl = '';
+  if (typeof CONFIG !== 'undefined') {
+    configUrl = CONFIG.WEB_APP_URL || CONFIG.DEFAULT_WEB_APP_URL || '';
+  }
+  const savedUrl = localStorage.getItem(URL_KEY);
+  return savedUrl || configUrl;
+}
+
 const NO_TRAILER = 'ไม่มีพ่วง';
 function fillProvinceSelect(sel, defaultValue, isTrailer) {
   const placeholder = isTrailer
@@ -396,14 +405,11 @@ document.getElementById('btnSaveUrl').addEventListener('click', () => {
 });
 
 (function loadSavedUrl(){
-  const defaultUrl = (typeof CONFIG !== 'undefined' && CONFIG.DEFAULT_WEB_APP_URL) ? CONFIG.DEFAULT_WEB_APP_URL : '';
-  const saved = localStorage.getItem(URL_KEY);
-  webAppUrlInput.value = saved || defaultUrl;
+  webAppUrlInput.value = getActiveWebAppUrl();
 })();
 
 function fetchSheetHistory() {
-  const defaultUrl = (typeof CONFIG !== 'undefined' && CONFIG.DEFAULT_WEB_APP_URL) ? CONFIG.DEFAULT_WEB_APP_URL : '';
-  const baseUrl = localStorage.getItem(URL_KEY) || defaultUrl;
+  const baseUrl = getActiveWebAppUrl();
   
   if (!baseUrl) return;
 
@@ -479,11 +485,10 @@ document.getElementById('btnRefreshHistory').addEventListener('click', fetchShee
 document.getElementById('logForm').addEventListener('submit', async function(e) {
   e.preventDefault();
 
-  const defaultUrl = (typeof CONFIG !== 'undefined' && CONFIG.DEFAULT_WEB_APP_URL) ? CONFIG.DEFAULT_WEB_APP_URL : '';
-  const webAppUrl = localStorage.getItem(URL_KEY) || defaultUrl;
+  const webAppUrl = getActiveWebAppUrl();
 
   if (!webAppUrl) {
-    Swal.fire({ icon: 'error', title: 'ไม่พบ Web App URL', text: 'กรุณาตั้งค่า URL ก่อนบันทึกข้อมูล' });
+    Swal.fire({ icon: 'error', title: 'ไม่พบ Web App URL', text: 'กรุณาติดต่อ Admin เพื่อตรวจสอบไฟล์ config.js' });
     return;
   }
 
