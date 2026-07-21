@@ -47,21 +47,6 @@
   .toggle-side.active-down { background-color: #2E8BC0; color: #fff; }
   .result-btn.active-ok { background-color: #1E8E5A; color: #fff; border-color: #1E8E5A; }
   .result-btn.active-no { background-color: #DC2626; color: #fff; border-color: #DC2626; }
-  
-  .tab-btn.active {
-    border-bottom: 3px solid #0B4A8F;
-    color: #0B4A8F;
-    font-weight: bold;
-  }
-
-  .spinner {
-    border: 3px solid rgba(255,255,255,.4);
-    border-top-color: #fff;
-    border-radius: 50%;
-    width: 20px; height: 20px;
-    animation: spin .7s linear infinite;
-  }
-  @keyframes spin { to { transform: rotate(360deg); } }
 
   input[type="date"]::-webkit-calendar-picker-indicator,
   input[type="time"]::-webkit-calendar-picker-indicator {
@@ -236,28 +221,23 @@
     </button>
   </form>
 
-  <!-- ประวัติล่าสุด ดึงจาก Google Sheets Direct -->
+  <!-- ประวัติล่าสุด -->
   <section class="mt-8 mb-4">
     <div class="flex items-center justify-between mb-3">
       <h2 class="text-base font-bold text-gov-blueDark">ประวัติการบันทึกล่าสุด (แสดง 10 รายการล่าสุด)</h2>
       <button id="btnRefreshHistory" class="text-xs bg-slate-200 text-gov-blueDark px-3 py-1.5 rounded-lg font-semibold hover:bg-slate-300">🔄 รีเฟรชข้อมูล</button>
     </div>
 
-    <!-- Tabs สลับ ขาขึ้น / ขาล่อง -->
-    <div class="flex border-b border-slate-200 mb-2">
-      <button type="button" class="tab-btn active px-4 py-2 font-semibold text-sm" onclick="switchTab('ขาขึ้น')">⬆️ ฝั่งขาขึ้น</button>
-      <button type="button" class="tab-btn px-4 py-2 font-semibold text-sm text-slate-500" onclick="switchTab('ขาล่อง')">⬇️ ฝั่งขาล่อง</button>
-    </div>
-
     <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-x-auto">
-      <table class="w-full text-sm min-w-[640px]">
+      <table class="w-full text-sm min-w-[680px]">
         <thead class="bg-slate-100 text-gov-blueDark">
           <tr>
-            <th class="text-left px-3 py-2 font-semibold">เวลาปฏิบัติงาน</th>
-            <th class="text-left px-3 py-2 font-semibold">ทะเบียนรถ</th>
-            <th class="text-left px-3 py-2 font-semibold">สิ่งที่ขนส่ง</th>
-            <th class="text-left px-3 py-2 font-semibold">ผลการพ่นน้ำยา</th>
-            <th class="text-center px-3 py-2 font-semibold">สถานะระบบ</th>
+            <th class="text-center px-3 py-2.5 font-semibold">ฝั่งด่าน</th>
+            <th class="text-left px-3 py-2.5 font-semibold">เวลาปฏิบัติงาน</th>
+            <th class="text-left px-3 py-2.5 font-semibold">ทะเบียนรถ</th>
+            <th class="text-left px-3 py-2.5 font-semibold">สิ่งที่ขนส่ง</th>
+            <th class="text-left px-3 py-2.5 font-semibold">ต้นทาง ➔ ปลายทาง</th>
+            <th class="text-center px-3 py-2.5 font-semibold">สถานะระบบ</th>
           </tr>
         </thead>
         <tbody id="historyBody" class="divide-y divide-slate-100"></tbody>
@@ -281,13 +261,12 @@ const PROVINCES = [
   "พิจิตร","พิษณุโลก","เพชรบุรี","เพชรบูรณ์","แพร่","ภูเก็ต","มหาสารคาม","มุกดาหาร","แม่ฮ่องสอน",
   "ยโสธร","ยะลา","ร้อยเอ็ด","ระนอง","ระยอง","ราชบุรี","ลพบุรี","ลำปาง","ลำพูน","เลย","ศรีสะเกษ",
   "สกลนคร","สงขลา","สตูล","สมุทรปราการ","สมุทรสงคราม","สมุทรสาคร","สระแก้ว","สระบุรี","สิงห์บุรี",
-  "สุโخทัย","สุพรรณบุรี","สุราษฎร์ธานี","สุรินทร์","หนองคาย","หนองบัวลำภู","อ่างทอง","อำนาจเจริญ",
+  "สุโขทัย","สุพรรณบุรี","สุราษฎร์ธานี","สุรินทร์","หนองคาย","หนองบัวลำภู","อ่างทอง","อำนาจเจริญ",
   "อุดรธานี","อุตรดิตถ์","อุทัยธานี","อุบลราชธานี"
 ];
 const WHEEL_OPTIONS = [4,6,8,10,12,18,20,22,24];
 const URL_KEY = 'qav_webapp_url';
 let sheetDataStore = [];
-let currentTab = 'ขาขึ้น';
 
 /* ============ Dropdowns & Form Setup ============ */
 const NO_TRAILER = 'ไม่มีพ่วง';
@@ -412,73 +391,74 @@ document.getElementById('btnSaveUrl').addEventListener('click', () => {
   webAppUrlInput.value = saved || CONFIG.DEFAULT_WEB_APP_URL;
 })();
 
-/* ============ Fetch ประวัติจาก Google Sheets Directly ============ */
-async function fetchSheetHistory() {
-  const url = localStorage.getItem(URL_KEY) || CONFIG.DEFAULT_WEB_APP_URL;
+/* ============ Fetch ประวัติโดยใช้ JSONP ============ */
+function fetchSheetHistory() {
+  const baseUrl = localStorage.getItem(URL_KEY) || CONFIG.DEFAULT_WEB_APP_URL;
   const empty = document.getElementById('historyEmpty');
   empty.textContent = 'กำลังโหลดข้อมูลจาก Google Sheets...';
   empty.classList.remove('hidden');
 
-  try {
-    const res = await fetch(url + '?action=getHistory');
-    const data = await res.json();
-    if (data.status === 'success') {
-      sheetDataStore = data.data;
-      renderHistoryTabs();
+  window.handleSheetHistoryResponse = function(response) {
+    if (response && response.status === 'success') {
+      sheetDataStore = response.data;
+      renderHistoryTable();
     } else {
       empty.textContent = 'ไม่สามารถดึงข้อมูลได้';
     }
-  } catch (e) {
-    empty.textContent = 'เกิดข้อผิดพลาดในการดึงข้อมูลจาก Sheets';
-  }
+    const oldScript = document.getElementById('jsonp-script');
+    if (oldScript) oldScript.remove();
+  };
+
+  const script = document.createElement('script');
+  script.id = 'jsonp-script';
+  script.src = `${baseUrl}?action=getHistory&callback=handleSheetHistoryResponse&t=${new Date().getTime()}`;
+  script.onerror = function() {
+    empty.textContent = 'เกิดข้อผิดพลาดในการดึงข้อมูล (กรุณาเช็ก URL หรือการตั้งค่า Deploy)';
+  };
+  document.body.appendChild(script);
 }
 
-function switchTab(side) {
-  currentTab = side;
-  document.querySelectorAll('.tab-btn').forEach(btn => {
-    if (btn.textContent.includes(side)) {
-      btn.classList.add('active', 'text-gov-blue');
-      btn.classList.remove('text-slate-500');
-    } else {
-      btn.classList.remove('active', 'text-gov-blue');
-      btn.classList.add('text-slate-500');
-    }
-  });
-  renderHistoryTabs();
-}
-
-function renderHistoryTabs() {
+function renderHistoryTable() {
   const body = document.getElementById('historyBody');
   const empty = document.getElementById('historyEmpty');
   body.innerHTML = '';
 
-  const filtered = sheetDataStore.filter(item => item.checkpointSide === currentTab);
-
-  if (filtered.length === 0) {
-    empty.textContent = `ยังไม่มีประวัติการบันทึกฝั่ง (${currentTab})`;
+  if (!sheetDataStore || sheetDataStore.length === 0) {
+    empty.textContent = 'ยังไม่มีประวัติการบันทึกข้อมูล';
     empty.classList.remove('hidden');
     return;
   }
   empty.classList.add('hidden');
 
-  // จำกัดแสดงสูงสุด 10 รายการล่าสุด
-  filtered.slice(0, 10).forEach(item => {
+  // แสดงรวมกันสูงสุด 10 รายการล่าสุด
+  sheetDataStore.slice(0, 10).forEach(item => {
     const tr = document.createElement('tr');
     
-    // ดึงค่าสถานะลงระบบย้อนหลัง
+    // Badge แยกฝั่ง ขาขึ้น / ขาล่อง
+    const isUp = item.checkpointSide === 'ขาขึ้น';
+    const sideBadge = isUp
+      ? `<span class="bg-blue-100 text-gov-blue text-xs px-2.5 py-1 rounded-lg font-bold border border-blue-200">⬆️ ขาขึ้น</span>`
+      : `<span class="bg-sky-100 text-gov-sky text-xs px-2.5 py-1 rounded-lg font-bold border border-sky-200">⬇️ ขาล่อง</span>`;
+
+    // Badge สถานะลงระบบ
     const isDone = item.backlogStatus === 'ลงระบบแล้ว';
     const statusBadge = isDone 
       ? `<span class="bg-green-100 text-green-700 text-xs px-2.5 py-1 rounded-full font-bold">✓ ลงระบบแล้ว</span>`
       : `<span class="bg-yellow-100 text-yellow-700 text-xs px-2.5 py-1 rounded-full font-bold">⏳ รอดำเนินการ</span>`;
 
-    // แสดงเวลาปฏิบัติงาน
     const timeDisplay = item.operationTime || '-';
+    
+    // ข้อมูลต้นทาง ➔ ปลายทาง
+    const origin = item.originProvince || '-';
+    const destination = item.destinationProvince || '-';
+    const routeDisplay = (origin === '-' && destination === '-') ? '-' : `${origin} ➔ ${destination}`;
 
     tr.innerHTML = `
+      <td class="px-3 py-2.5 whitespace-nowrap text-center">${sideBadge}</td>
       <td class="px-3 py-2.5 whitespace-nowrap text-gov-gray font-medium">${timeDisplay}</td>
       <td class="px-3 py-2.5 whitespace-nowrap font-medium text-slate-800">${item.licensePlate || '-'}</td>
       <td class="px-3 py-2.5 whitespace-nowrap">${item.cargoType || '-'}</td>
-      <td class="px-3 py-2.5 whitespace-nowrap">${item.disinfectionResult || '-'}</td>
+      <td class="px-3 py-2.5 whitespace-nowrap font-medium text-slate-700">${routeDisplay}</td>
       <td class="px-3 py-2.5 whitespace-nowrap text-center">${statusBadge}</td>
     `;
     body.appendChild(tr);
@@ -587,7 +567,7 @@ function resetForm() {
   cargoOther.classList.add('hidden');
 }
 
-// โหลดข้อมูลจาก Google Sheets ทันทีเมื่อเปิดหน้า
+// โหลดข้อมูลประวัติทันทีเมื่อเปิดหน้า
 fetchSheetHistory();
 </script>
 </body>
