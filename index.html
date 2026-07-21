@@ -4,7 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
 <title>ระบบบันทึกข้อมูลพ่นน้ำยาฆ่าเชื้อ FMD SAT 1 | ด่านกักกันสัตว์นครสวรรค์</title>
-<!-- ⬇️ เพิ่มบรรทัดนี้เพื่อใส่โลโก้ Favicon ⬇️ -->
 <link rel="icon" type="image/png" href="https://i.ibb.co/Rpxz70ZC/Logoaqi.png">
 
 <script src="https://cdn.tailwindcss.com"></script>
@@ -12,7 +11,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
-<script src="config.js" onerror="console.log('No config.js found, fallback used.')"></script>
+<script src="config.js?v=1.0.1" onerror="console.log('No config.js found')"></script>
 
 <script>
   tailwind.config = {
@@ -44,14 +43,13 @@
     background-color: #0B4A8F; color: #fff; border-color: #0B4A8F;
     box-shadow: 0 2px 8px rgba(11,74,143,.35);
   }
-/* แก้ไขสีปุ่มเวลาถูกเลือก (Active Status) */
   .toggle-side.active-up { 
-    background-color: #059669; /* สีเขียว */
+    background-color: #059669; 
     border-color: #059669; 
     color: #ffffff; 
   }
   .toggle-side.active-down { 
-    background-color: #d97706; /* สีส้ม */
+    background-color: #d97706; 
     border-color: #d97706; 
     color: #ffffff; 
   }
@@ -70,8 +68,6 @@
 <!-- Header -->
 <header class="bg-gradient-to-r from-gov-blueDark via-gov-blue to-gov-sky text-white shadow-lg">
   <div class="max-w-3xl mx-auto px-4 py-6 flex items-center gap-4">
-    
-    <!-- ⬇️ เปลี่ยนเป็นรูปโลโก้ของคุณ ⬇️ -->
     <div class="w-14 h-14 rounded-2xl bg-white/15 flex items-center justify-center shrink-0 border border-white/20 p-1.5 overflow-hidden">
       <img src="https://i.ibb.co/Rpxz70ZC/Logoaqi.png" alt="Logo" class="w-full h-full object-contain">
     </div>
@@ -81,7 +77,6 @@
       <p class="text-sm sm:text-base text-blue-100 leading-snug">ระบบบันทึกข้อมูลพ่นน้ำยาฆ่าเชื้อ FMD SAT 1</p>
     </div>
     
-    <!-- ปุ่มตั้งค่า (ที่มีอยู่เดิม) -->
     <button id="btnSettings" class="ml-auto shrink-0 w-11 h-11 rounded-xl bg-white/15 hover:bg-white/25 flex items-center justify-center border border-white/20" aria-label="ตั้งค่า">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" class="w-6 h-6">
         <circle cx="12" cy="12" r="3"/>
@@ -111,11 +106,9 @@
     <div>
       <label class="block text-sm font-bold text-gov-blueDark mb-2">ฝั่งด่านกักกัน <span class="text-red-500">*</span></label>
       <div class="grid grid-cols-2 gap-3">
-        <!-- ขาขึ้น (สีเขียว) -->
         <button type="button" data-side="ขาขึ้น" class="toggle-side border-2 border-emerald-600 text-emerald-700 hover:bg-emerald-50 rounded-2xl py-4 font-bold text-base transition">
           ⬆️ ขาขึ้น
         </button>
-        <!-- ขาล่อง (สีส้ม) -->
         <button type="button" data-side="ขาล่อง" class="toggle-side border-2 border-amber-600 text-amber-700 hover:bg-amber-50 rounded-2xl py-4 font-bold text-base transition">
           ⬇️ ขาล่อง
         </button>
@@ -172,7 +165,7 @@
 
     <!-- สิ่งที่ขนส่ง -->
     <div>
-      <label class="block text-sm font-bold text-gov-blueDark mb-2">ประเภทสัตว์ที่เคลือนย้าย <span class="text-red-500">*</span></label>
+      <label class="block text-sm font-bold text-gov-blueDark mb-2">ประเภทสัตว์ที่เคลื่อนย้าย <span class="text-red-500">*</span></label>
       <select id="cargoType" required
         class="w-full border border-slate-300 rounded-xl px-4 py-3 text-base bg-white focus:outline-none focus:ring-2 focus:ring-gov-sky">
         <option value="">-- เลือกชนิดสัตว์ --</option>
@@ -280,11 +273,11 @@ const WHEEL_OPTIONS = [4,6,8,10,12,18,20,22,24];
 const URL_KEY = 'qav_webapp_url';
 let sheetDataStore = [];
 
-// ฟังก์ชันดึง Web App URL จาก config.js เป็นหลัก หากไม่มีค่อยดู localStorage
+// ดึง Web App URL อัตโนมัติจาก config.js ก่อนเป็นอันดับแรก
 function getActiveWebAppUrl() {
   let configUrl = '';
   if (typeof CONFIG !== 'undefined') {
-    configUrl = CONFIG.WEB_APP_URL || CONFIG.DEFAULT_WEB_APP_URL || '';
+    configUrl = CONFIG.DEFAULT_WEB_APP_URL || CONFIG.WEB_APP_URL || '';
   }
   const savedUrl = localStorage.getItem(URL_KEY);
   return savedUrl || configUrl;
@@ -430,14 +423,28 @@ function fetchSheetHistory() {
 
   const script = document.createElement('script');
   script.id = 'jsonp-script';
-  script.src = `${baseUrl}?action=getHistory&callback=handleSheetHistoryResponse&t=${new Date().getTime()}`;
+  // ใส่ Timestamp ต่อท้ายเพื่อล้าง Cache ป้องกันข้อมูลไม่ตรงกันระหว่างเครื่อง
+  script.src = `${baseUrl}?action=getHistory&callback=handleSheetHistoryResponse&_t=${new Date().getTime()}`;
   script.onerror = function() {
     empty.textContent = 'เกิดข้อผิดพลาดในการดึงข้อมูล (กรุณาเช็ก Web App URL)';
   };
   document.body.appendChild(script);
 }
 
-// แสดงตารางประวัติย้อนหลัง (โชว์เฉพาะทะเบียนหลัก ไม่เอาทะเบียนพ่วง)
+// ช่วยจัด Format ข้อความวันที่เวลา ป้องกันกรณีที่ได้ข้อความหลุดมา
+function sanitizeDateTime(dateStr, timeStr) {
+  let dStr = (dateStr || '').replace(/^'/, '').trim();
+  let tStr = (timeStr || '').replace(/^'/, '').trim();
+
+  if (dStr.includes('GMT') || dStr.includes('เวลาอินโดจีน')) {
+    try {
+      let d = new Date(dStr);
+      dStr = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+    } catch(e){}
+  }
+  return `${dStr} ${tStr}`.trim() || '-';
+}
+
 function renderHistoryTable() {
   const body = document.getElementById('historyBody');
   const empty = document.getElementById('historyEmpty');
@@ -463,7 +470,7 @@ function renderHistoryTable() {
       ? `<span class="bg-green-100 text-green-700 text-xs px-2.5 py-1 rounded-full font-bold">✓ ลงระบบแล้ว</span>`
       : `<span class="bg-yellow-100 text-yellow-700 text-xs px-2.5 py-1 rounded-full font-bold">⏳ ยังไม่ลงระบบ</span>`;
 
-    const timeDisplay = `${item.operationDate || ''} ${item.operationTime || ''}`.trim() || '-';
+    const timeDisplay = sanitizeDateTime(item.operationDate, item.operationTime);
     const origin = item.originProvince || '-';
     const destination = item.destinationProvince || '-';
     const routeDisplay = (origin === '-' && destination === '-') ? '-' : `${origin} ➔ ${destination}`;
@@ -488,7 +495,7 @@ document.getElementById('logForm').addEventListener('submit', async function(e) 
   const webAppUrl = getActiveWebAppUrl();
 
   if (!webAppUrl) {
-    Swal.fire({ icon: 'error', title: 'ไม่พบ Web App URL', text: 'กรุณาติดต่อ Admin เพื่อตรวจสอบไฟล์ config.js' });
+    Swal.fire({ icon: 'error', title: 'ไม่พบ Web App URL', text: 'กรุณาตั้งค่า URL ใน config.js' });
     return;
   }
 
