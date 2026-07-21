@@ -123,14 +123,14 @@
     <div>
       <label class="block text-sm font-bold text-gov-blueDark mb-2">ฝั่งด่านกักกัน <span class="text-red-500">*</span></label>
       <div class="grid grid-cols-2 gap-3">
-        <button type="button" data-side="ขาขึ้น" class="toggle-side border-2 border-gov-blue text-gov-blue rounded-2xl py-4 font-bold text-base active-up">
+        <button type="button" data-side="ขาขึ้น" class="toggle-side border-2 border-gov-blue text-gov-blue rounded-2xl py-4 font-bold text-base">
           ⬆️ ขาขึ้น
         </button>
         <button type="button" data-side="ขาล่อง" class="toggle-side border-2 border-gov-sky text-gov-sky rounded-2xl py-4 font-bold text-base">
           ⬇️ ขาล่อง
         </button>
       </div>
-      <input type="hidden" id="checkpointSide" value="ขาขึ้น">
+      <input type="hidden" id="checkpointSide" value="" required>
     </div>
 
     <!-- วันที่ -->
@@ -424,6 +424,9 @@ document.getElementById('logForm').addEventListener('submit', async function(e) 
     return;
   }
 
+  if (!document.getElementById('checkpointSide').value) {
+    Swal.fire({ icon: 'warning', title: 'กรุณาเลือกฝั่งด่านกักกัน (ขาขึ้น / ขาล่อง)' }); return;
+  }
   if (!document.getElementById('vehicleWheels').value) {
     Swal.fire({ icon: 'warning', title: 'กรุณาเลือกประเภทรถ (จำนวนล้อ)' }); return;
   }
@@ -533,8 +536,7 @@ function resetForm() {
   document.querySelectorAll('.result-btn').forEach(b => b.classList.remove('active-ok','active-no'));
   document.getElementById('disinfectionResult').value = '';
   document.querySelectorAll('.toggle-side').forEach(b => b.classList.remove('active-up','active-down'));
-  document.querySelector('.toggle-side[data-side="ขาขึ้น"]').classList.add('active-up');
-  document.getElementById('checkpointSide').value = 'ขาขึ้น';
+  document.getElementById('checkpointSide').value = '';
   fillProvinceSelect(document.getElementById('licenseProvince'), 'นครสวรรค์');
   cargoOther.classList.add('hidden');
   cargoOther.required = false;
