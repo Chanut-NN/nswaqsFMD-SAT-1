@@ -153,7 +153,7 @@
       <input type="hidden" id="vehicleWheels" required>
     </div>
 
-    <!-- ทะเบียนรถ (ปรับตามแบบรูปที่ต้องการ) -->
+    <!-- ทะเบียนรถ -->
     <div class="space-y-4">
       <div>
         <label class="block text-sm font-bold text-gov-blueDark mb-1">ทะเบียนรถ <span class="text-red-500">*</span></label>
@@ -165,7 +165,7 @@
           class="w-full border border-slate-300 rounded-xl px-4 py-3 text-base bg-white focus:outline-none focus:ring-2 focus:ring-gov-sky"></select>
       </div>
 
-      <!-- ทะเบียนพ่วงหลัง (เปลี่ยนจากพ่วงหน้าเป็นพ่วงหลังเลย) -->
+      <!-- ทะเบียนพ่วงหลัง -->
       <div class="bg-slate-50 rounded-2xl border border-slate-200 p-4">
         <label class="block text-sm font-bold text-gov-blueDark mb-1">ทะเบียนพ่วงหลัง <span class="text-xs font-normal text-gov-gray">(ถ้ามี)</span></label>
         <input type="text" id="trailerRearPlate" placeholder="เช่น 80-5678"
@@ -239,7 +239,7 @@
   <!-- ประวัติล่าสุด ดึงจาก Google Sheets Direct -->
   <section class="mt-8 mb-4">
     <div class="flex items-center justify-between mb-3">
-      <h2 class="text-base font-bold text-gov-blueDark">ประวัติการบันทึกล่าสุด (จาก Google Sheets)</h2>
+      <h2 class="text-base font-bold text-gov-blueDark">ประวัติการบันทึกล่าสุด (แสดง 10 รายการล่าสุด)</h2>
       <button id="btnRefreshHistory" class="text-xs bg-slate-200 text-gov-blueDark px-3 py-1.5 rounded-lg font-semibold hover:bg-slate-300">🔄 รีเฟรชข้อมูล</button>
     </div>
 
@@ -281,7 +281,7 @@ const PROVINCES = [
   "พิจิตร","พิษณุโลก","เพชรบุรี","เพชรบูรณ์","แพร่","ภูเก็ต","มหาสารคาม","มุกดาหาร","แม่ฮ่องสอน",
   "ยโสธร","ยะลา","ร้อยเอ็ด","ระนอง","ระยอง","ราชบุรี","ลพบุรี","ลำปาง","ลำพูน","เลย","ศรีสะเกษ",
   "สกลนคร","สงขลา","สตูล","สมุทรปราการ","สมุทรสงคราม","สมุทรสาคร","สระแก้ว","สระบุรี","สิงห์บุรี",
-  "สุโขทัย","สุพรรณบุรี","สุราษฎร์ธานี","สุรินทร์","หนองคาย","หนองบัวลำภู","อ่างทอง","อำนาจเจริญ",
+  "สุโخทัย","สุพรรณบุรี","สุราษฎร์ธานี","สุรินทร์","หนองคาย","หนองบัวลำภู","อ่างทอง","อำนาจเจริญ",
   "อุดรธานี","อุตรดิตถ์","อุทัยธานี","อุบลราชธานี"
 ];
 const WHEEL_OPTIONS = [4,6,8,10,12,18,20,22,24];
@@ -461,17 +461,24 @@ function renderHistoryTabs() {
   }
   empty.classList.add('hidden');
 
-  filtered.slice(0, 15).forEach(item => {
+  // จำกัดแสดงสูงสุด 10 รายการล่าสุด
+  filtered.slice(0, 10).forEach(item => {
     const tr = document.createElement('tr');
-    const statusBadge = item.status === 'ลงระบบแล้ว' 
+    
+    // ดึงค่าสถานะลงระบบย้อนหลัง
+    const isDone = item.backlogStatus === 'ลงระบบแล้ว';
+    const statusBadge = isDone 
       ? `<span class="bg-green-100 text-green-700 text-xs px-2.5 py-1 rounded-full font-bold">✓ ลงระบบแล้ว</span>`
       : `<span class="bg-yellow-100 text-yellow-700 text-xs px-2.5 py-1 rounded-full font-bold">⏳ รอดำเนินการ</span>`;
 
+    // แสดงเวลาปฏิบัติงาน
+    const timeDisplay = item.operationTime || '-';
+
     tr.innerHTML = `
-      <td class="px-3 py-2.5 whitespace-nowrap text-gov-gray">${item.opDateTime}</td>
-      <td class="px-3 py-2.5 whitespace-nowrap font-medium text-slate-800">${item.licensePlate}</td>
-      <td class="px-3 py-2.5 whitespace-nowrap">${item.cargoType}</td>
-      <td class="px-3 py-2.5 whitespace-nowrap">${item.disinfectionResult}</td>
+      <td class="px-3 py-2.5 whitespace-nowrap text-gov-gray font-medium">${timeDisplay}</td>
+      <td class="px-3 py-2.5 whitespace-nowrap font-medium text-slate-800">${item.licensePlate || '-'}</td>
+      <td class="px-3 py-2.5 whitespace-nowrap">${item.cargoType || '-'}</td>
+      <td class="px-3 py-2.5 whitespace-nowrap">${item.disinfectionResult || '-'}</td>
       <td class="px-3 py-2.5 whitespace-nowrap text-center">${statusBadge}</td>
     `;
     body.appendChild(tr);
