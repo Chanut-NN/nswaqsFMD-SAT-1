@@ -10,7 +10,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
-<script src="config.js"></script>
+<!-- ไฟล์คอนฟิกภายนอก (ถ้าไม่มี ระบบจะใช้ URL สำรองด้านล่างให้) -->
+<script src="config.js" onerror="console.log('No config.js found, fallback used.')"></script>
 
 <script>
   tailwind.config = {
@@ -121,7 +122,7 @@
           <button type="button" id="btnToday" class="bg-gov-green text-white font-semibold rounded-xl px-3 py-3 text-sm whitespace-nowrap hover:opacity-90">วันนี้</button>
         </div>
         <div class="flex gap-2">
-          <input type="text" id="operationTime" required placeholder="HH:mm (เช่น 23:07)" pattern="^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$"
+          <input type="text" id="operationTime" required placeholder="HH:mm (เช่น 01:06)"
             class="flex-1 border border-slate-300 rounded-xl px-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-gov-sky">
           <button type="button" id="btnNowTime" class="bg-gov-sky text-white font-semibold rounded-xl px-3 py-3 text-sm whitespace-nowrap hover:opacity-90">ตอนนี้</button>
         </div>
@@ -139,7 +140,7 @@
     <div class="space-y-4">
       <div>
         <label class="block text-sm font-bold text-gov-blueDark mb-1">ทะเบียนรถ <span class="text-red-500">*</span></label>
-        <input type="text" id="licensePlate" required placeholder="เช่น 80-1234"
+        <input type="text" id="licensePlate" required placeholder="เช่น 80-5551"
           class="w-full border border-slate-300 rounded-xl px-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-gov-sky mb-3">
         
         <label class="block text-sm font-bold text-gov-blueDark mb-1">จังหวัดทะเบียนรถ <span class="text-red-500">*</span></label>
@@ -150,7 +151,7 @@
       <!-- ทะเบียนพ่วงหลัง -->
       <div class="bg-slate-50 rounded-2xl border border-slate-200 p-4">
         <label class="block text-sm font-bold text-gov-blueDark mb-1">ทะเบียนพ่วงหลัง <span class="text-xs font-normal text-gov-gray">(ถ้ามี)</span></label>
-        <input type="text" id="trailerRearPlate" placeholder="เช่น 80-5678"
+        <input type="text" id="trailerRearPlate" placeholder="เช่น 80-5552"
           class="w-full border border-slate-300 rounded-xl px-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-gov-sky mb-3">
         
         <select id="trailerRearProvince"
@@ -208,7 +209,7 @@
     <!-- ผู้ปฏิบัติงาน -->
     <div>
       <label class="block text-sm font-bold text-gov-blueDark mb-2">ผู้ปฏิบัติงาน <span class="text-red-500">*</span></label>
-      <input type="text" id="operatorName" required placeholder="ชื่อ-นามสกุล หรือรหัสผู้ปฏิบัติงาน"
+      <input type="text" id="operatorName" required placeholder="ชื่อ-นามสกุล ผู้ปฏิบัติงาน"
         class="w-full border border-slate-300 rounded-xl px-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-gov-sky">
     </div>
 
@@ -357,7 +358,8 @@ document.getElementById('btnSettings').addEventListener('click', () => {
       inputValidator: (val) => { if (!val) return 'กรุณากรอกรหัสผ่าน'; }
     }).then(res2 => {
       if (res2.isConfirmed) {
-        if (res2.value === CONFIG.DEV_PASSCODE) {
+        const pass = (typeof CONFIG !== 'undefined' && CONFIG.DEV_PASSCODE) ? CONFIG.DEV_PASSCODE : '1234';
+        if (res2.value === pass) {
           settingsPanel.classList.toggle('hidden');
         } else {
           Swal.fire({ icon: 'error', title: 'รหัสผ่านไม่ถูกต้อง', timer: 1800, showConfirmButton: false });
@@ -378,12 +380,17 @@ document.getElementById('btnSaveUrl').addEventListener('click', () => {
 });
 
 (function loadSavedUrl(){
+  const defaultUrl = (typeof CONFIG !== 'undefined' && CONFIG.DEFAULT_WEB_APP_URL) ? CONFIG.DEFAULT_WEB_APP_URL : '';
   const saved = localStorage.getItem(URL_KEY);
-  webAppUrlInput.value = saved || CONFIG.DEFAULT_WEB_APP_URL;
+  webAppUrlInput.value = saved || defaultUrl;
 })();
 
 function fetchSheetHistory() {
-  const baseUrl = localStorage.getItem(URL_KEY) || CONFIG.DEFAULT_WEB_APP_URL;
+  const defaultUrl = (typeof CONFIG !== 'undefined' && CONFIG.DEFAULT_WEB_APP_URL) ? CONFIG.DEFAULT_WEB_APP_URL : '';
+  const baseUrl = localStorage.getItem(URL_KEY) || defaultUrl;
+  
+  if (!baseUrl) return;
+
   const empty = document.getElementById('historyEmpty');
   empty.textContent = 'กำลังโหลดข้อมูลจาก Google Sheets...';
   empty.classList.remove('hidden');
@@ -403,7 +410,7 @@ function fetchSheetHistory() {
   script.id = 'jsonp-script';
   script.src = `${baseUrl}?action=getHistory&callback=handleSheetHistoryResponse&t=${new Date().getTime()}`;
   script.onerror = function() {
-    empty.textContent = 'เกิดข้อผิดพลาดในการดึงข้อมูล (กรุณาเช็ก URL หรือการตั้งค่า Deploy)';
+    empty.textContent = 'เกิดข้อผิดพลาดในการดึงข้อมูล (กรุณาเช็ก Web App URL)';
   };
   document.body.appendChild(script);
 }
@@ -428,12 +435,13 @@ function renderHistoryTable() {
       ? `<span class="bg-blue-100 text-gov-blue text-xs px-2.5 py-1 rounded-lg font-bold border border-blue-200">⬆️ ขาขึ้น</span>`
       : `<span class="bg-sky-100 text-gov-sky text-xs px-2.5 py-1 rounded-lg font-bold border border-sky-200">⬇️ ขาล่อง</span>`;
 
+    // เช็กสถานะ "ลงระบบแล้ว" กับ "ยังไม่ลงระบบ" ให้ถูกต้อง
     const isDone = item.backlogStatus === 'ลงระบบแล้ว';
     const statusBadge = isDone 
       ? `<span class="bg-green-100 text-green-700 text-xs px-2.5 py-1 rounded-full font-bold">✓ ลงระบบแล้ว</span>`
-      : `<span class="bg-yellow-100 text-yellow-700 text-xs px-2.5 py-1 rounded-full font-bold">⏳ รอลงระบบ</span>`;
+      : `<span class="bg-yellow-100 text-yellow-700 text-xs px-2.5 py-1 rounded-full font-bold">⏳ ยังไม่ลงระบบ</span>`;
 
-    const timeDisplay = item.operationTime || '-';
+    const timeDisplay = `${item.operationDate || ''} ${item.operationTime || ''}`.trim() || '-';
     const origin = item.originProvince || '-';
     const destination = item.destinationProvince || '-';
     const routeDisplay = (origin === '-' && destination === '-') ? '-' : `${origin} ➔ ${destination}`;
@@ -455,7 +463,13 @@ document.getElementById('btnRefreshHistory').addEventListener('click', fetchShee
 document.getElementById('logForm').addEventListener('submit', async function(e) {
   e.preventDefault();
 
-  const webAppUrl = localStorage.getItem(URL_KEY) || CONFIG.DEFAULT_WEB_APP_URL;
+  const defaultUrl = (typeof CONFIG !== 'undefined' && CONFIG.DEFAULT_WEB_APP_URL) ? CONFIG.DEFAULT_WEB_APP_URL : '';
+  const webAppUrl = localStorage.getItem(URL_KEY) || defaultUrl;
+
+  if (!webAppUrl) {
+    Swal.fire({ icon: 'error', title: 'ไม่พบ Web App URL', text: 'กรุณาตั้งค่า URL ก่อนบันทึกข้อมูล' });
+    return;
+  }
 
   if (!document.getElementById('checkpointSide').value) {
     Swal.fire({ icon: 'warning', title: 'กรุณาเลือกฝั่งด่านกักกัน' }); return;
@@ -478,13 +492,13 @@ document.getElementById('logForm').addEventListener('submit', async function(e) 
   const rawTrailerRearPlate = document.getElementById('trailerRearPlate').value.trim();
   const rawTrailerRearProvince = document.getElementById('trailerRearProvince').value;
 
+  // จัดโครงสร้างตัวแปรส่งเข้า Apps Script ใหม่ให้ตรงกับ Col A - M
   const payload = {
     checkpointSide: document.getElementById('checkpointSide').value,
     operationDate: document.getElementById('operationDate').value,
     operationTime: document.getElementById('operationTime').value,
     vehicleWheels: document.getElementById('vehicleWheels').value + ' ล้อ',
     licensePlate: `${rawLicensePlate} ${rawLicenseProvince}`.trim(),
-    trailerFront: NO_TRAILER,
     trailerRear: combinePlateProvince(rawTrailerRearPlate, rawTrailerRearProvince),
     cargoType: cargoSelect.value,
     cargoTypeOther: cargoOther.value.trim(),
@@ -494,16 +508,21 @@ document.getElementById('logForm').addEventListener('submit', async function(e) 
     operatorName: document.getElementById('operatorName').value.trim()
   };
 
+  const displayCargo = payload.cargoType === 'อื่นๆ' ? payload.cargoTypeOther : payload.cargoType;
+
   const confirmRes = await Swal.fire({
     icon: 'question',
     title: 'ยืนยันบันทึกข้อมูล',
     html: `
       <div style="text-align:left;font-size:14px;line-height:1.8">
-        <b>ฝั่ง:</b> ${payload.checkpointSide}<br>
+        <b>ฝั่งด่าน:</b> ${payload.checkpointSide}<br>
         <b>วันที่-เวลา:</b> ${payload.operationDate} (${payload.operationTime})<br>
-        <b>ทะเบียน:</b> ${payload.licensePlate}<br>
-        <b>พ่วงหลัง:</b> ${payload.trailerRear}<br>
-        <b>สิ่งที่ขนส่ง:</b> ${payload.cargoType === 'อื่นๆ' ? payload.cargoTypeOther : payload.cargoType}
+        <b>ประเภทรถ:</b> ${payload.vehicleWheels}<br>
+        <b>ทะเบียนรถ:</b> ${payload.licensePlate}<br>
+        <b>ทะเบียนพ่วง:</b> ${payload.trailerRear}<br>
+        <b>สิ่งที่ขนส่ง:</b> ${displayCargo}<br>
+        <b>เส้นทาง:</b> ${payload.originProvince} ➔ ${payload.destinationProvince}<br>
+        <b>ผู้บันทึก:</b> ${payload.operatorName}
       </div>
     `,
     showCancelButton: true,
@@ -520,17 +539,23 @@ document.getElementById('logForm').addEventListener('submit', async function(e) 
   btnText.textContent = 'กำลังบันทึก...';
 
   try {
-    await fetch(webAppUrl, {
+    const response = await fetch(webAppUrl, {
       method: 'POST',
       headers: { 'Content-Type': 'text/plain;charset=utf-8' },
       body: JSON.stringify(payload)
     });
 
-    await Swal.fire({ icon: 'success', title: 'บันทึกเรียบร้อย', timer: 1500, showConfirmButton: false });
-    resetForm();
-    fetchSheetHistory();
+    const result = await response.json();
+
+    if (result.status === 'success') {
+      await Swal.fire({ icon: 'success', title: 'บันทึกเรียบร้อย', timer: 1500, showConfirmButton: false });
+      resetForm();
+      fetchSheetHistory();
+    } else {
+      throw new Error(result.message || 'บันทึกไม่สำเร็จ');
+    }
   } catch (err) {
-    Swal.fire({ icon: 'error', title: 'เกิดข้อผิดพลาดในการบันทึก' });
+    Swal.fire({ icon: 'error', title: 'เกิดข้อผิดพลาดในการบันทึก', text: err.message });
   } finally {
     btnSubmit.disabled = false;
     btnText.textContent = 'บันทึกข้อมูล';
@@ -551,6 +576,7 @@ function resetForm() {
   cargoOther.classList.add('hidden');
 }
 
+// โหลดประวัติทันทีเมื่อเปิดหน้า
 fetchSheetHistory();
 </script>
 </body>
