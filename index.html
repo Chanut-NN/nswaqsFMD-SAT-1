@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+<title>ระบบบันทึกข้อมูลรถพ่นน้ำยาฆ่าเชื้อ | ด่านกักกันสัตว์นครสวรรค์</title>
+
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        fontFamily: { sarabun: ['Sarabun', 'sans-serif'] },
+        colors: {
+          gov: {
+            blue: '#0B4A8F',
+            blueDark: '#083764',
+            sky: '#2E8BC0',
+            green: '#1E8E5A',
+            gray: '#64748B',
+            bg: '#F1F5F9'
+          }
+        }
+      }
+    }
+  }
+</script>
+
+<style>
+  body { font-family: 'Sarabun', sans-serif; }
+  ::-webkit-scrollbar { width: 8px; }
+  ::-webkit-scrollbar-thumb { background: #94A3B8; border-radius: 8px; }
+
+  .chip {
+    transition: all .15s ease;
+  }
+  .chip.active {
+    background-color: #0B4A8F;
+    color: #fff;
+    border-color: #0B4A8F;
+    box-shadow: 0 2px 8px rgba(11,74,143,.35);
+  }
+  .toggle-side.active-up {
+    background-color: #0B4A8F;
+    color: #fff;
+  }
+  .toggle-side.active-down {
+    background-color: #2E8BC0;
+    color: #fff;
+  }
+  .result-btn.active-ok {
+    background-color: #1E8E5A;
+    color: #fff;
+    border-color: #1E8E5A;
+  }
+  .result-btn.active-no {
+    background-color: #DC2626;
+    color: #fff;
+    border-color: #DC2626;
+  }
+  .spinner {
+    border: 3px solid rgba(255,255,255,.4);
+    border-top-color: #fff;
+    border-radius: 50%;
+    width: 20px; height: 20px;
+    animation: spin .7s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(30%) sepia(70%) saturate(1000%) hue-rotate(180deg); }
+</style>
+</head>
+
+<body class="bg-gov-bg min-h-screen pb-16">
+
+<!-- Header -->
+<header class="bg-gradient-to-r from-gov-blueDark via-gov-blue to-gov-sky text-white shadow-lg">
+  <div class="max-w-3xl mx-auto px-4 py-6 flex items-center gap-4">
+    <div class="w-14 h-14 rounded-2xl bg-white/15 flex items-center justify-center shrink-0 border border-white/20">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" class="w-8 h-8">
+        <path d="M3 13l2-6a2 2 0 012-1h10a2 2 0 012 1l2 6" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M3 13h18v5a1 1 0 01-1 1h-1a2 2 0 01-4 0H8a2 2 0 01-4 0H3a1 1 0 01-1-1v-5z" stroke-linecap="round" stroke-linejoin="round"/>
+        <circle cx="7.5" cy="18.5" r="1.5"/>
+        <circle cx="16.5" cy="18.5" r="1.5"/>
+        <path d="M12 5v3M9 5v3" stroke-linecap="round"/>
+      </svg>
+    </div>
+    <div class="min-w-0">
+      <h1 class="text-lg sm:text-xl font-bold leading-snug">ระบบบันทึกข้อมูลรถพ่นน้ำยาฆ่าเชื้อ</h1>
+      <p class="text-sm sm:text-base text-blue-100 leading-snug">ด่านกักกันสัตว์นครสวรรค์</p>
+    </div>
+    <button id="btnSettings" class="ml-auto shrink-0 w-11 h-11 rounded-xl bg-white/15 hover:bg-white/25 flex items-center justify-center border border-white/20" aria-label="ตั้งค่า">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" class="w-6 h-6">
+        <circle cx="12" cy="12" r="3"/>
+        <path d="M19.4 15a1.7 1.7 0 00.34 1.87l.06.06a2 2 0 11-2.83 2.83l-.06-.06a1.7 1.7 0 00-1.87-.34 1.7 1.7 0 00-1 1.55V21a2 2 0 01-4 0v-.09A1.7 1.7 0 009 19.4a1.7 1.7 0 00-1.87.34l-.06.06a2 2 0 11-2.83-2.83l.06-.06A1.7 1.7 0 004.6 15a1.7 1.7 0 00-1.55-1H3a2 2 0 010-4h.09A1.7 1.7 0 004.6 9a1.7 1.7 0 00-.34-1.87l-.06-.06a2 2 0 112.83-2.83l.06.06A1.7 1.7 0 009 4.6a1.7 1.7 0 001-1.55V3a2 2 0 014 0v.09a1.7 1.7 0 001 1.55 1.7 1.7 0 001.87-.34l.06-.06a2 2 0 112.83 2.83l-.06.06A1.7 1.7 0 0019.4 9a1.7 1.7 0 001.55 1H21a2 2 0 010 4h-.09a1.7 1.7 0 00-1.51 1z"/>
+      </svg>
+    </button>
+  </div>
+</header>
+
+<!-- Settings panel -->
+<div id="settingsPanel" class="hidden bg-white border-b border-gov-gray/20">
+  <div class="max-w-3xl mx-auto px-4 py-4">
+    <label class="block text-sm font-semibold text-gov-blueDark mb-1">Web App URL (Google Apps Script)</label>
+    <div class="flex flex-col sm:flex-row gap-2">
+      <input id="webAppUrl" type="url" placeholder="https://script.google.com/macros/s/xxxxxxxx/exec"
+        class="flex-1 border border-slate-300 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-gov-sky">
+      <button id="btnSaveUrl" class="bg-gov-blue text-white font-semibold rounded-xl px-5 py-3 text-sm hover:bg-gov-blueDark">บันทึก URL</button>
+    </div>
+    <p class="text-xs text-gov-gray mt-2">คัดลอก URL ที่ได้จากการ Deploy Google Apps Script (Web App) มาวางที่นี่ ระบบจะจดจำไว้ในเครื่องนี้</p>
+  </div>
+</div>
+
+<main class="max-w-3xl mx-auto px-4 mt-6">
+
+  <form id="logForm" class="bg-white rounded-2xl shadow-md border border-slate-200 p-4 sm:p-6 space-y-6">
+
+    <!-- ฝั่งด่าน -->
+    <div>
+      <label class="block text-sm font-bold text-gov-blueDark mb-2">ฝั่งด่านกักกัน <span class="text-red-500">*</span></label>
+      <div class="grid grid-cols-2 gap-3">
+        <button type="button" data-side="ขาขึ้น" class="toggle-side border-2 border-gov-blue text-gov-blue rounded-2xl py-4 font-bold text-base active-up">
+          ⬆️ ขาขึ้น
+        </button>
+        <button type="button" data-side="ขาล่อง" class="toggle-side border-2 border-gov-sky text-gov-sky rounded-2xl py-4 font-bold text-base">
+          ⬇️ ขาล่อง
+        </button>
+      </div>
+      <input type="hidden" id="checkpointSide" value="ขาขึ้น">
+    </div>
+
+    <!-- วันที่ -->
+    <div>
+      <label class="block text-sm font-bold text-gov-blueDark mb-2">วันที่ปฏิบัติงาน <span class="text-red-500">*</span></label>
+      <div class="flex gap-2">
+        <input type="date" id="operationDate" required
+          class="flex-1 border border-slate-300 rounded-xl px-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-gov-sky">
+        <button type="button" id="btnToday" class="bg-gov-green text-white font-semibold rounded-xl px-4 py-3 text-sm whitespace-nowrap hover:opacity-90">วันนี้</button>
+      </div>
+      <p class="text-xs text-gov-gray mt-1">เวลาบันทึกจะถูกดึงอัตโนมัติจากขณะที่กด "บันทึกข้อมูล"</p>
+    </div>
+
+    <!-- ประเภทรถ -->
+    <div>
+      <label class="block text-sm font-bold text-gov-blueDark mb-2">ประเภทรถ (จำนวนล้อ) <span class="text-red-500">*</span></label>
+      <div id="wheelChips" class="flex flex-wrap gap-2"></div>
+      <input type="hidden" id="vehicleWheels" required>
+    </div>
+
+    <!-- ทะเบียนรถ -->
+    <div class="grid sm:grid-cols-2 gap-4">
+      <div>
+        <label class="block text-sm font-bold text-gov-blueDark mb-2">ทะเบียนรถ <span class="text-red-500">*</span></label>
+        <input type="text" id="licensePlate" required placeholder="เช่น 80-1234"
+          class="w-full border border-slate-300 rounded-xl px-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-gov-sky">
+      </div>
+      <div>
+        <label class="block text-sm font-bold text-gov-blueDark mb-2">จังหวัดทะเบียนรถ <span class="text-red-500">*</span></label>
+        <select id="licenseProvince" required
+          class="w-full border border-slate-300 rounded-xl px-4 py-3 text-base bg-white focus:outline-none focus:ring-2 focus:ring-gov-sky"></select>
+      </div>
+    </div>
+
+    <!-- สิ่งที่ขนส่ง -->
+    <div>
+      <label class="block text-sm font-bold text-gov-blueDark mb-2">ประเภทสิ่งที่ขนส่ง <span class="text-red-500">*</span></label>
+      <select id="cargoType" required
+        class="w-full border border-slate-300 rounded-xl px-4 py-3 text-base bg-white focus:outline-none focus:ring-2 focus:ring-gov-sky">
+        <option value="">-- เลือกสิ่งที่ขนส่ง --</option>
+        <option>โค</option>
+        <option>กระบือ</option>
+        <option>แพะ</option>
+        <option>แกะ</option>
+        <option>สุกร</option>
+        <option>พืชอาหารสัตว์</option>
+        <option>รถเปล่าที่ใช้ในการเปลี่ยนถ่ายสัตว์</option>
+        <option value="อื่นๆ">อื่นๆ (ระบุ)</option>
+      </select>
+      <input type="text" id="cargoTypeOther" placeholder="ระบุสิ่งที่ขนส่ง"
+        class="hidden mt-2 w-full border border-slate-300 rounded-xl px-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-gov-sky">
+    </div>
+
+    <!-- ต้นทาง-ปลายทาง -->
+    <div class="grid sm:grid-cols-2 gap-4">
+      <div>
+        <label class="block text-sm font-bold text-gov-blueDark mb-2">จังหวัดต้นทาง <span class="text-red-500">*</span></label>
+        <select id="originProvince" required
+          class="w-full border border-slate-300 rounded-xl px-4 py-3 text-base bg-white focus:outline-none focus:ring-2 focus:ring-gov-sky"></select>
+      </div>
+      <div>
+        <label class="block text-sm font-bold text-gov-blueDark mb-2">จังหวัดปลายทาง <span class="text-red-500">*</span></label>
+        <select id="destinationProvince" required
+          class="w-full border border-slate-300 rounded-xl px-4 py-3 text-base bg-white focus:outline-none focus:ring-2 focus:ring-gov-sky"></select>
+      </div>
+    </div>
+
+    <!-- ผลการพ่นน้ำยา -->
+    <div>
+      <label class="block text-sm font-bold text-gov-blueDark mb-2">ผลการพ่นน้ำยาฆ่าเชื้อ <span class="text-red-500">*</span></label>
+      <div class="grid grid-cols-2 gap-3">
+        <button type="button" data-result="พ่นครบตามแผน" class="result-btn border-2 border-gov-green text-gov-green rounded-2xl py-4 font-bold text-sm sm:text-base">
+          ✅ พ่นครบตามแผน
+        </button>
+        <button type="button" data-result="ไม่ได้พ่น" class="result-btn border-2 border-red-500 text-red-500 rounded-2xl py-4 font-bold text-sm sm:text-base">
+          ❌ ไม่ได้พ่น
+        </button>
+      </div>
+      <input type="hidden" id="disinfectionResult" required>
+    </div>
+
+    <!-- ผู้ปฏิบัติงาน -->
+    <div>
+      <label class="block text-sm font-bold text-gov-blueDark mb-2">ผู้ปฏิบัติงาน <span class="text-red-500">*</span></label>
+      <input type="text" id="operatorName" required placeholder="ชื่อ-นามสกุล หรือรหัสผู้ปฏิบัติงาน"
+        class="w-full border border-slate-300 rounded-xl px-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-gov-sky">
+    </div>
+
+    <button type="submit" id="btnSubmit"
+      class="w-full bg-gov-blue hover:bg-gov-blueDark text-white font-bold text-lg rounded-2xl py-4 flex items-center justify-center gap-2 shadow-lg shadow-gov-blue/30 transition">
+      <span id="btnSubmitText">บันทึกข้อมูล</span>
+    </button>
+  </form>
+
+  <!-- ประวัติล่าสุด -->
+  <section class="mt-8 mb-4">
+    <div class="flex items-center justify-between mb-3">
+      <h2 class="text-base font-bold text-gov-blueDark">ประวัติการบันทึกล่าสุด (ในเครื่องนี้)</h2>
+      <button id="btnClearHistory" class="text-xs text-red-500 font-semibold hover:underline">ล้างประวัติ</button>
+    </div>
+    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-x-auto">
+      <table class="w-full text-sm min-w-[640px]">
+        <thead class="bg-slate-100 text-gov-blueDark">
+          <tr>
+            <th class="text-left px-3 py-2 font-semibold">เวลาบันทึก</th>
+            <th class="text-left px-3 py-2 font-semibold">ฝั่งด่าน</th>
+            <th class="text-left px-3 py-2 font-semibold">ทะเบียนรถ</th>
+            <th class="text-left px-3 py-2 font-semibold">สิ่งที่ขนส่ง</th>
+            <th class="text-left px-3 py-2 font-semibold">ผลการพ่นน้ำยา</th>
+          </tr>
+        </thead>
+        <tbody id="historyBody" class="divide-y divide-slate-100"></tbody>
+      </table>
+      <p id="historyEmpty" class="text-center text-gov-gray text-sm py-6">ยังไม่มีประวัติการบันทึก</p>
+    </div>
+  </section>
+</main>
+
+<footer class="text-center text-xs text-gov-gray mt-6 pb-4">
+  ด่านกักกันสัตว์นครสวรรค์ · ระบบบันทึกข้อมูลรถพ่นน้ำยาฆ่าเชื้อ
+</footer>
+
+<script>
+/* ============ ข้อมูล 77 จังหวัด ============ */
+const PROVINCES = [
+  "กรุงเทพมหานคร","กระบี่","กาญจนบุรี","กาฬสินธุ์","กำแพงเพชร","ขอนแก่น","จันทบุรี","ฉะเชิงเทรา",
+  "ชลบุรี","ชัยนาท","ชัยภูมิ","ชุมพร","เชียงราย","เชียงใหม่","ตรัง","ตราด","ตาก","นครนายก","นครปฐม",
+  "นครพนม","นครราชสีมา","นครศรีธรรมราช","นครสวรรค์","นนทบุรี","นราธิวาส","น่าน","บึงกาฬ","บุรีรัมย์",
+  "ปทุมธานี","ประจวบคีรีขันธ์","ปราจีนบุรี","ปัตตานี","พระนครศรีอยุธยา","พะเยา","พังงา","พัทลุง",
+  "พิจิตร","พิษณุโลก","เพชรบุรี","เพชรบูรณ์","แพร่","ภูเก็ต","มหาสารคาม","มุกดาหาร","แม่ฮ่องสอน",
+  "ยโสธร","ยะลา","ร้อยเอ็ด","ระนอง","ระยอง","ราชบุรี","ลพบุรี","ลำปาง","ลำพูน","เลย","ศรีสะเกษ",
+  "สกลนคร","สงขลา","สตูล","สมุทรปราการ","สมุทรสงคราม","สมุทรสาคร","สระแก้ว","สระบุรี","สิงห์บุรี",
+  "สุโขทัย","สุพรรณบุรี","สุราษฎร์ธานี","สุรินทร์","หนองคาย","หนองบัวลำภู","อ่างทอง","อำนาจเจริญ",
+  "อุดรธานี","อุตรดิตถ์","อุทัยธานี","อุบลราชธานี"
+];
+const WHEEL_OPTIONS = [4,6,8,10,12,18,20,22,24];
+const HISTORY_KEY = 'qav_history_v1';
+const URL_KEY = 'qav_webapp_url';
+
+/* ============ Populate dropdowns ============ */
+function fillProvinceSelect(sel, defaultValue) {
+  sel.innerHTML = '<option value="">-- เลือกจังหวัด --</option>' +
+    PROVINCES.map(p => `<option value="${p}" ${p === defaultValue ? 'selected' : ''}>${p}</option>`).join('');
+}
+fillProvinceSelect(document.getElementById('licenseProvince'), 'นครสวรรค์');
+fillProvinceSelect(document.getElementById('originProvince'), '');
+fillProvinceSelect(document.getElementById('destinationProvince'), '');
+
+const wheelChipsEl = document.getElementById('wheelChips');
+WHEEL_OPTIONS.forEach(w => {
+  const btn = document.createElement('button');
+  btn.type = 'button';
+  btn.className = 'chip border-2 border-slate-300 text-slate-600 rounded-xl px-4 py-2.5 font-semibold text-sm';
+  btn.textContent = w + ' ล้อ';
+  btn.dataset.wheel = w;
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('#wheelChips .chip').forEach(c => c.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('vehicleWheels').value = w;
+  });
+  wheelChipsEl.appendChild(btn);
+});
+
+/* ============ วันที่ default = วันนี้ ============ */
+function setToday() {
+  const d = new Date();
+  const iso = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+  document.getElementById('operationDate').value = iso;
+}
+setToday();
+document.getElementById('btnToday').addEventListener('click', setToday);
+
+/* ============ Toggle: ฝั่งด่าน ============ */
+document.querySelectorAll('.toggle-side').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.toggle-side').forEach(b => b.classList.remove('active-up','active-down'));
+    const side = btn.dataset.side;
+    btn.classList.add(side === 'ขาขึ้น' ? 'active-up' : 'active-down');
+    document.getElementById('checkpointSide').value = side;
+  });
+});
+
+/* ============ Toggle: ผลการพ่นน้ำยา ============ */
+document.querySelectorAll('.result-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.result-btn').forEach(b => b.classList.remove('active-ok','active-no'));
+    const r = btn.dataset.result;
+    btn.classList.add(r === 'พ่นครบตามแผน' ? 'active-ok' : 'active-no');
+    document.getElementById('disinfectionResult').value = r;
+  });
+});
+
+/* ============ สิ่งที่ขนส่ง: อื่นๆ ============ */
+const cargoSelect = document.getElementById('cargoType');
+const cargoOther = document.getElementById('cargoTypeOther');
+cargoSelect.addEventListener('change', () => {
+  if (cargoSelect.value === 'อื่นๆ') {
+    cargoOther.classList.remove('hidden');
+    cargoOther.required = true;
+  } else {
+    cargoOther.classList.add('hidden');
+    cargoOther.required = false;
+    cargoOther.value = '';
+  }
+});
+
+/* ============ Settings panel: Web App URL ============ */
+const settingsPanel = document.getElementById('settingsPanel');
+const webAppUrlInput = document.getElementById('webAppUrl');
+document.getElementById('btnSettings').addEventListener('click', () => {
+  settingsPanel.classList.toggle('hidden');
+});
+document.getElementById('btnSaveUrl').addEventListener('click', () => {
+  const url = webAppUrlInput.value.trim();
+  if (!url) { return; }
+  localStorage.setItem(URL_KEY, url);
+  Swal.fire({ icon: 'success', title: 'บันทึก URL แล้ว', timer: 1400, showConfirmButton: false });
+  settingsPanel.classList.add('hidden');
+});
+(function loadSavedUrl(){
+  const saved = localStorage.getItem(URL_KEY);
+  if (saved) {
+    webAppUrlInput.value = saved;
+  } else {
+    settingsPanel.classList.remove('hidden');
+  }
+})();
+
+/* ============ ประวัติล่าสุด (localStorage) ============ */
+function loadHistory() {
+  try { return JSON.parse(localStorage.getItem(HISTORY_KEY)) || []; }
+  catch (e) { return []; }
+}
+function saveHistory(list) {
+  localStorage.setItem(HISTORY_KEY, JSON.stringify(list.slice(0, 20)));
+}
+function renderHistory() {
+  const list = loadHistory();
+  const body = document.getElementById('historyBody');
+  const empty = document.getElementById('historyEmpty');
+  body.innerHTML = '';
+  if (list.length === 0) {
+    empty.classList.remove('hidden');
+    return;
+  }
+  empty.classList.add('hidden');
+  list.forEach(item => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td class="px-3 py-2 whitespace-nowrap text-gov-gray">${item.timestamp}</td>
+      <td class="px-3 py-2 whitespace-nowrap">${item.checkpointSide}</td>
+      <td class="px-3 py-2 whitespace-nowrap font-medium">${item.licensePlate}</td>
+      <td class="px-3 py-2 whitespace-nowrap">${item.cargoType}</td>
+      <td class="px-3 py-2 whitespace-nowrap">${item.disinfectionResult}</td>
+    `;
+    body.appendChild(tr);
+  });
+}
+renderHistory();
+document.getElementById('btnClearHistory').addEventListener('click', () => {
+  Swal.fire({
+    icon: 'warning', title: 'ล้างประวัติในเครื่องนี้?', showCancelButton: true,
+    confirmButtonText: 'ล้างประวัติ', cancelButtonText: 'ยกเลิก', confirmButtonColor: '#DC2626'
+  }).then(res => {
+    if (res.isConfirmed) { saveHistory([]); renderHistory(); }
+  });
+});
+
+/* ============ Submit form ============ */
+document.getElementById('logForm').addEventListener('submit', async function(e) {
+  e.preventDefault();
+
+  const webAppUrl = localStorage.getItem(URL_KEY);
+  if (!webAppUrl) {
+    Swal.fire({ icon: 'error', title: 'ยังไม่ได้ตั้งค่า Web App URL', text: 'กรุณากดปุ่มตั้งค่า (มุมขวาบน) เพื่อใส่ลิงก์ Google Apps Script ก่อน' });
+    settingsPanel.classList.remove('hidden');
+    return;
+  }
+
+  if (!document.getElementById('vehicleWheels').value) {
+    Swal.fire({ icon: 'warning', title: 'กรุณาเลือกประเภทรถ (จำนวนล้อ)' }); return;
+  }
+  if (!document.getElementById('disinfectionResult').value) {
+    Swal.fire({ icon: 'warning', title: 'กรุณาเลือกผลการพ่นน้ำยาฆ่าเชื้อ' }); return;
+  }
+
+  const now = new Date();
+  const timeStr = now.toLocaleString('th-TH', { hour12: false });
+
+  const payload = {
+    checkpointSide: document.getElementById('checkpointSide').value,
+    operationDate: document.getElementById('operationDate').value,
+    vehicleWheels: document.getElementById('vehicleWheels').value + ' ล้อ',
+    licensePlate: document.getElementById('licensePlate').value.trim(),
+    licenseProvince: document.getElementById('licenseProvince').value,
+    cargoType: cargoSelect.value,
+    cargoTypeOther: cargoOther.value.trim(),
+    originProvince: document.getElementById('originProvince').value,
+    destinationProvince: document.getElementById('destinationProvince').value,
+    disinfectionResult: document.getElementById('disinfectionResult').value,
+    operatorName: document.getElementById('operatorName').value.trim()
+  };
+
+  const btnSubmit = document.getElementById('btnSubmit');
+  const btnText = document.getElementById('btnSubmitText');
+  btnSubmit.disabled = true;
+  btnSubmit.classList.add('opacity-70');
+  btnText.innerHTML = '';
+  const spinner = document.createElement('span');
+  spinner.className = 'spinner';
+  btnText.appendChild(spinner);
+  btnText.append(' กำลังบันทึก...');
+
+  try {
+    // ใช้ text/plain เพื่อเลี่ยงปัญหา CORS preflight กับ Google Apps Script
+    await fetch(webAppUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify(payload)
+    });
+
+    const historyItem = {
+      timestamp: timeStr,
+      checkpointSide: payload.checkpointSide,
+      licensePlate: payload.licensePlate,
+      cargoType: payload.cargoType === 'อื่นๆ' ? ('อื่นๆ: ' + payload.cargoTypeOther) : payload.cargoType,
+      disinfectionResult: payload.disinfectionResult
+    };
+    const list = loadHistory();
+    list.unshift(historyItem);
+    saveHistory(list);
+    renderHistory();
+
+    await Swal.fire({
+      icon: 'success', title: 'บันทึกข้อมูลสำเร็จ', timer: 1800, showConfirmButton: false
+    });
+
+    resetForm();
+
+  } catch (err) {
+    Swal.fire({ icon: 'error', title: 'บันทึกไม่สำเร็จ', text: 'กรุณาตรวจสอบการเชื่อมต่ออินเทอร์เน็ต หรือ Web App URL แล้วลองใหม่อีกครั้ง' });
+  } finally {
+    btnSubmit.disabled = false;
+    btnSubmit.classList.remove('opacity-70');
+    btnText.textContent = 'บันทึกข้อมูล';
+  }
+});
+
+function resetForm() {
+  document.getElementById('logForm').reset();
+  setToday();
+  document.querySelectorAll('#wheelChips .chip').forEach(c => c.classList.remove('active'));
+  document.getElementById('vehicleWheels').value = '';
+  document.querySelectorAll('.result-btn').forEach(b => b.classList.remove('active-ok','active-no'));
+  document.getElementById('disinfectionResult').value = '';
+  document.querySelectorAll('.toggle-side').forEach(b => b.classList.remove('active-up','active-down'));
+  document.querySelector('.toggle-side[data-side="ขาขึ้น"]').classList.add('active-up');
+  document.getElementById('checkpointSide').value = 'ขาขึ้น';
+  fillProvinceSelect(document.getElementById('licenseProvince'), 'นครสวรรค์');
+  cargoOther.classList.add('hidden');
+  cargoOther.required = false;
+}
+</script>
+</body>
+</html>
