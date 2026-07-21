@@ -10,7 +10,6 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
-<!-- ไฟล์คอนฟิกภายนอก (ถ้าไม่มี ระบบจะใช้ URL สำรองด้านล่างให้) -->
 <script src="config.js" onerror="console.log('No config.js found, fallback used.')"></script>
 
 <script>
@@ -415,6 +414,7 @@ function fetchSheetHistory() {
   document.body.appendChild(script);
 }
 
+// แสดงตารางประวัติย้อนหลัง (โชว์เฉพาะทะเบียนหลัก ไม่เอาทะเบียนพ่วง)
 function renderHistoryTable() {
   const body = document.getElementById('historyBody');
   const empty = document.getElementById('historyEmpty');
@@ -435,7 +435,6 @@ function renderHistoryTable() {
       ? `<span class="bg-blue-100 text-gov-blue text-xs px-2.5 py-1 rounded-lg font-bold border border-blue-200">⬆️ ขาขึ้น</span>`
       : `<span class="bg-sky-100 text-gov-sky text-xs px-2.5 py-1 rounded-lg font-bold border border-sky-200">⬇️ ขาล่อง</span>`;
 
-    // เช็กสถานะ "ลงระบบแล้ว" กับ "ยังไม่ลงระบบ" ให้ถูกต้อง
     const isDone = item.backlogStatus === 'ลงระบบแล้ว';
     const statusBadge = isDone 
       ? `<span class="bg-green-100 text-green-700 text-xs px-2.5 py-1 rounded-full font-bold">✓ ลงระบบแล้ว</span>`
@@ -449,7 +448,7 @@ function renderHistoryTable() {
     tr.innerHTML = `
       <td class="px-3 py-2.5 whitespace-nowrap text-center">${sideBadge}</td>
       <td class="px-3 py-2.5 whitespace-nowrap text-gov-gray font-medium">${timeDisplay}</td>
-      <td class="px-3 py-2.5 whitespace-nowrap font-medium text-slate-800">${item.licensePlate || '-'}</td>
+      <td class="px-3 py-2.5 whitespace-nowrap font-semibold text-slate-800">${item.licensePlate || '-'}</td>
       <td class="px-3 py-2.5 whitespace-nowrap">${item.cargoType || '-'}</td>
       <td class="px-3 py-2.5 whitespace-nowrap font-medium text-slate-700">${routeDisplay}</td>
       <td class="px-3 py-2.5 whitespace-nowrap text-center">${statusBadge}</td>
@@ -492,7 +491,6 @@ document.getElementById('logForm').addEventListener('submit', async function(e) 
   const rawTrailerRearPlate = document.getElementById('trailerRearPlate').value.trim();
   const rawTrailerRearProvince = document.getElementById('trailerRearProvince').value;
 
-  // จัดโครงสร้างตัวแปรส่งเข้า Apps Script ใหม่ให้ตรงกับ Col A - M
   const payload = {
     checkpointSide: document.getElementById('checkpointSide').value,
     operationDate: document.getElementById('operationDate').value,
@@ -515,7 +513,7 @@ document.getElementById('logForm').addEventListener('submit', async function(e) 
     title: 'ยืนยันบันทึกข้อมูล',
     html: `
       <div style="text-align:left;font-size:14px;line-height:1.8">
-        <b>ฝั่งด่าน:</b> ${payload.checkpointSide}<br>
+        <b>บันทึกลงชีต:</b> ${payload.checkpointSide}<br>
         <b>วันที่-เวลา:</b> ${payload.operationDate} (${payload.operationTime})<br>
         <b>ประเภทรถ:</b> ${payload.vehicleWheels}<br>
         <b>ทะเบียนรถ:</b> ${payload.licensePlate}<br>
@@ -576,7 +574,6 @@ function resetForm() {
   cargoOther.classList.add('hidden');
 }
 
-// โหลดประวัติทันทีเมื่อเปิดหน้า
 fetchSheetHistory();
 </script>
 </body>
