@@ -10,7 +10,6 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
-<!-- โหลด config แยก -->
 <script src="config.js"></script>
 
 <script>
@@ -91,7 +90,6 @@
         class="flex-1 border border-slate-300 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-gov-sky">
       <button id="btnSaveUrl" class="bg-gov-blue text-white font-semibold rounded-xl px-5 py-3 text-sm hover:bg-gov-blueDark">บันทึก URL</button>
     </div>
-    <p class="text-xs text-gov-gray mt-2">คัดลอก URL ที่ได้จากการ Deploy Google Apps Script (Web App) มาวางที่นี่</p>
   </div>
 </div>
 
@@ -128,7 +126,6 @@
           <button type="button" id="btnNowTime" class="bg-gov-sky text-white font-semibold rounded-xl px-3 py-3 text-sm whitespace-nowrap hover:opacity-90">ตอนนี้</button>
         </div>
       </div>
-      <p class="text-xs text-gov-gray mt-1">สามารถเลือกเวลาลงย้อนหลังได้ หากไม่ได้เปลี่ยนจะใช้วันและเวลาปัจจุบัน</p>
     </div>
 
     <!-- ประเภทรถ -->
@@ -252,7 +249,6 @@
 </footer>
 
 <script>
-/* ============ ข้อมูล 77 จังหวัด ============ */
 const PROVINCES = [
   "กรุงเทพมหานคร","กระบี่","กาญจนบุรี","กาฬสินธุ์","กำแพงเพชร","ขอนแก่น","จันทบุรี","ฉะเชิงเทรา",
   "ชลบุรี","ชัยนาท","ชัยภูมิ","ชุมพร","เชียงราย","เชียงใหม่","ตรัง","ตราด","ตาก","นครนายก","นครปฐม",
@@ -268,7 +264,6 @@ const WHEEL_OPTIONS = [4,6,8,10,12,18,20,22,24];
 const URL_KEY = 'qav_webapp_url';
 let sheetDataStore = [];
 
-/* ============ Dropdowns & Form Setup ============ */
 const NO_TRAILER = 'ไม่มีพ่วง';
 function fillProvinceSelect(sel, defaultValue, isTrailer) {
   const placeholder = isTrailer
@@ -296,7 +291,6 @@ WHEEL_OPTIONS.forEach(w => {
   wheelChipsEl.appendChild(btn);
 });
 
-/* ============ วันที่ / เวลา Default ============ */
 function setNow() {
   const d = new Date();
   const isoDate = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
@@ -308,7 +302,6 @@ setNow();
 document.getElementById('btnToday').addEventListener('click', setNow);
 document.getElementById('btnNowTime').addEventListener('click', setNow);
 
-/* ============ Toggle Side & Result ============ */
 document.querySelectorAll('.toggle-side').forEach(btn => {
   btn.addEventListener('click', () => {
     document.querySelectorAll('.toggle-side').forEach(b => b.classList.remove('active-up','active-down'));
@@ -327,7 +320,6 @@ document.querySelectorAll('.result-btn').forEach(btn => {
   });
 });
 
-/* ============ Cargo type select ============ */
 const cargoSelect = document.getElementById('cargoType');
 const cargoOther = document.getElementById('cargoTypeOther');
 cargoSelect.addEventListener('change', () => {
@@ -341,7 +333,6 @@ cargoSelect.addEventListener('change', () => {
   }
 });
 
-/* ============ Settings Panel & URL Security ============ */
 const settingsPanel = document.getElementById('settingsPanel');
 const webAppUrlInput = document.getElementById('webAppUrl');
 
@@ -391,7 +382,6 @@ document.getElementById('btnSaveUrl').addEventListener('click', () => {
   webAppUrlInput.value = saved || CONFIG.DEFAULT_WEB_APP_URL;
 })();
 
-/* ============ Fetch ประวัติโดยใช้ JSONP ============ */
 function fetchSheetHistory() {
   const baseUrl = localStorage.getItem(URL_KEY) || CONFIG.DEFAULT_WEB_APP_URL;
   const empty = document.getElementById('historyEmpty');
@@ -430,25 +420,20 @@ function renderHistoryTable() {
   }
   empty.classList.add('hidden');
 
-  // แสดงรวมกันสูงสุด 10 รายการล่าสุด
   sheetDataStore.slice(0, 10).forEach(item => {
     const tr = document.createElement('tr');
     
-    // Badge แยกฝั่ง ขาขึ้น / ขาล่อง
     const isUp = item.checkpointSide === 'ขาขึ้น';
     const sideBadge = isUp
       ? `<span class="bg-blue-100 text-gov-blue text-xs px-2.5 py-1 rounded-lg font-bold border border-blue-200">⬆️ ขาขึ้น</span>`
       : `<span class="bg-sky-100 text-gov-sky text-xs px-2.5 py-1 rounded-lg font-bold border border-sky-200">⬇️ ขาล่อง</span>`;
 
-    // Badge สถานะลงระบบ
     const isDone = item.backlogStatus === 'ลงระบบแล้ว';
     const statusBadge = isDone 
       ? `<span class="bg-green-100 text-green-700 text-xs px-2.5 py-1 rounded-full font-bold">✓ ลงระบบแล้ว</span>`
       : `<span class="bg-yellow-100 text-yellow-700 text-xs px-2.5 py-1 rounded-full font-bold">⏳ รอดำเนินการ</span>`;
 
     const timeDisplay = item.operationTime || '-';
-    
-    // ข้อมูลต้นทาง ➔ ปลายทาง
     const origin = item.originProvince || '-';
     const destination = item.destinationProvince || '-';
     const routeDisplay = (origin === '-' && destination === '-') ? '-' : `${origin} ➔ ${destination}`;
@@ -467,7 +452,6 @@ function renderHistoryTable() {
 
 document.getElementById('btnRefreshHistory').addEventListener('click', fetchSheetHistory);
 
-/* ============ Submit Form ============ */
 document.getElementById('logForm').addEventListener('submit', async function(e) {
   e.preventDefault();
 
@@ -567,7 +551,6 @@ function resetForm() {
   cargoOther.classList.add('hidden');
 }
 
-// โหลดข้อมูลประวัติทันทีเมื่อเปิดหน้า
 fetchSheetHistory();
 </script>
 </body>
