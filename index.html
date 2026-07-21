@@ -270,6 +270,10 @@ const WHEEL_OPTIONS = [4,6,8,10,12,18,20,22,24];
 const HISTORY_KEY = 'qav_history_v1';
 const URL_KEY = 'qav_webapp_url';
 
+// URL ที่ได้จากการ Deploy Google Apps Script (Web App) — ฝังไว้ในไฟล์เลย
+// เครื่อง/เบราว์เซอร์ใหม่ที่เข้ามาจะใช้ค่านี้ได้ทันทีโดยไม่ต้องตั้งค่าเอง
+const DEFAULT_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbyBM9eBIW-EExX7SdqhQkGi4VsYUXw1tlAe7jPIK0IOCAOIbuC9EF6XFR931bwN673K/exec';
+
 /* ============ Populate dropdowns ============ */
 function fillProvinceSelect(sel, defaultValue) {
   sel.innerHTML = '<option value="">-- เลือกจังหวัด --</option>' +
@@ -352,11 +356,9 @@ document.getElementById('btnSaveUrl').addEventListener('click', () => {
 });
 (function loadSavedUrl(){
   const saved = localStorage.getItem(URL_KEY);
-  if (saved) {
-    webAppUrlInput.value = saved;
-  } else {
-    settingsPanel.classList.remove('hidden');
-  }
+  webAppUrlInput.value = saved || DEFAULT_WEB_APP_URL;
+  // settingsPanel ซ่อนอยู่โดย default แล้ว (เข้าเว็บมากรอกข้อมูลได้เลย)
+  // กดไอคอนเฟืองมุมขวาบนได้ทุกเมื่อ หากต้องการเปลี่ยน Web App URL ในอนาคต
 })();
 
 /* ============ ประวัติล่าสุด (localStorage) ============ */
@@ -403,7 +405,7 @@ document.getElementById('btnClearHistory').addEventListener('click', () => {
 document.getElementById('logForm').addEventListener('submit', async function(e) {
   e.preventDefault();
 
-  const webAppUrl = localStorage.getItem(URL_KEY);
+  const webAppUrl = localStorage.getItem(URL_KEY) || DEFAULT_WEB_APP_URL;
   if (!webAppUrl) {
     Swal.fire({ icon: 'error', title: 'ยังไม่ได้ตั้งค่า Web App URL', text: 'กรุณากดปุ่มตั้งค่า (มุมขวาบน) เพื่อใส่ลิงก์ Google Apps Script ก่อน' });
     settingsPanel.classList.remove('hidden');
