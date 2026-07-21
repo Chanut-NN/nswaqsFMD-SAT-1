@@ -42,8 +42,17 @@
     background-color: #0B4A8F; color: #fff; border-color: #0B4A8F;
     box-shadow: 0 2px 8px rgba(11,74,143,.35);
   }
-  .toggle-side.active-up { background-color: #0B4A8F; color: #fff; }
-  .toggle-side.active-down { background-color: #2E8BC0; color: #fff; }
+/* แก้ไขสีปุ่มเวลาถูกเลือก (Active Status) */
+  .toggle-side.active-up { 
+    background-color: #059669; /* สีเขียว */
+    border-color: #059669; 
+    color: #ffffff; 
+  }
+  .toggle-side.active-down { 
+    background-color: #d97706; /* สีส้ม */
+    border-color: #d97706; 
+    color: #ffffff; 
+  }
   .result-btn.active-ok { background-color: #1E8E5A; color: #fff; border-color: #1E8E5A; }
   .result-btn.active-no { background-color: #DC2626; color: #fff; border-color: #DC2626; }
 
@@ -98,13 +107,16 @@
   <form id="logForm" class="bg-white rounded-2xl shadow-md border border-slate-200 p-4 sm:p-6 space-y-6">
 
     <!-- ฝั่งด่าน -->
+ <!-- ฝั่งด่าน -->
     <div>
       <label class="block text-sm font-bold text-gov-blueDark mb-2">ฝั่งด่านกักกัน <span class="text-red-500">*</span></label>
       <div class="grid grid-cols-2 gap-3">
-        <button type="button" data-side="ขาขึ้น" class="toggle-side border-2 border-gov-blue text-gov-blue rounded-2xl py-4 font-bold text-base">
+        <!-- ขาขึ้น (สีเขียว) -->
+        <button type="button" data-side="ขาขึ้น" class="toggle-side border-2 border-emerald-600 text-emerald-700 hover:bg-emerald-50 rounded-2xl py-4 font-bold text-base transition">
           ⬆️ ขาขึ้น
         </button>
-        <button type="button" data-side="ขาล่อง" class="toggle-side border-2 border-gov-sky text-gov-sky rounded-2xl py-4 font-bold text-base">
+        <!-- ขาล่อง (สีส้ม) -->
+        <button type="button" data-side="ขาล่อง" class="toggle-side border-2 border-amber-600 text-amber-700 hover:bg-amber-50 rounded-2xl py-4 font-bold text-base transition">
           ⬇️ ขาล่อง
         </button>
       </div>
@@ -160,10 +172,10 @@
 
     <!-- สิ่งที่ขนส่ง -->
     <div>
-      <label class="block text-sm font-bold text-gov-blueDark mb-2">ประเภทสิ่งที่ขนส่ง <span class="text-red-500">*</span></label>
+      <label class="block text-sm font-bold text-gov-blueDark mb-2">ประเภทสัตว์ที่เคลือนย้าย <span class="text-red-500">*</span></label>
       <select id="cargoType" required
         class="w-full border border-slate-300 rounded-xl px-4 py-3 text-base bg-white focus:outline-none focus:ring-2 focus:ring-gov-sky">
-        <option value="">-- เลือกสิ่งที่ขนส่ง --</option>
+        <option value="">-- เลือกชนิดสัตว์ --</option>
         <option>โค</option>
         <option>กระบือ</option>
         <option>แพะ</option>
@@ -173,7 +185,7 @@
         <option>รถเปล่าที่ใช้ในการเปลี่ยนถ่ายสัตว์</option>
         <option value="อื่นๆ">อื่นๆ (ระบุ)</option>
       </select>
-      <input type="text" id="cargoTypeOther" placeholder="ระบุสิ่งที่ขนส่ง"
+      <input type="text" id="cargoTypeOther" placeholder="ระบุประเภทสัตว์"
         class="hidden mt-2 w-full border border-slate-300 rounded-xl px-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-gov-sky">
     </div>
 
@@ -208,7 +220,7 @@
     <!-- ผู้ปฏิบัติงาน -->
     <div>
       <label class="block text-sm font-bold text-gov-blueDark mb-2">ผู้ปฏิบัติงาน <span class="text-red-500">*</span></label>
-      <input type="text" id="operatorName" required placeholder="ชื่อ-นามสกุล ผู้ปฏิบัติงาน"
+      <input type="text" id="operatorName" required placeholder="ชื่อ ผู้ปฏิบัติงาน"
         class="w-full border border-slate-300 rounded-xl px-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-gov-sky">
     </div>
 
@@ -232,7 +244,7 @@
             <th class="text-center px-3 py-2.5 font-semibold">ฝั่งด่าน</th>
             <th class="text-left px-3 py-2.5 font-semibold">เวลาปฏิบัติงาน</th>
             <th class="text-left px-3 py-2.5 font-semibold">ทะเบียนรถ</th>
-            <th class="text-left px-3 py-2.5 font-semibold">สิ่งที่ขนส่ง</th>
+            <th class="text-left px-3 py-2.5 font-semibold">ชนิดสัตว์</th>
             <th class="text-left px-3 py-2.5 font-semibold">ต้นทาง ➔ ปลายทาง</th>
             <th class="text-center px-3 py-2.5 font-semibold">สถานะระบบ</th>
           </tr>
@@ -432,8 +444,8 @@ function renderHistoryTable() {
     
     const isUp = item.checkpointSide === 'ขาขึ้น';
     const sideBadge = isUp
-      ? `<span class="bg-blue-100 text-gov-blue text-xs px-2.5 py-1 rounded-lg font-bold border border-blue-200">⬆️ ขาขึ้น</span>`
-      : `<span class="bg-sky-100 text-gov-sky text-xs px-2.5 py-1 rounded-lg font-bold border border-sky-200">⬇️ ขาล่อง</span>`;
+      ? `<span class="bg-emerald-100 text-emerald-800 text-xs px-2.5 py-1 rounded-lg font-bold border border-emerald-300">⬆️ ขาขึ้น</span>`
+      : `<span class="bg-amber-100 text-amber-800 text-xs px-2.5 py-1 rounded-lg font-bold border border-amber-300">⬇️ ขาล่อง</span>`;
 
     const isDone = item.backlogStatus === 'ลงระบบแล้ว';
     const statusBadge = isDone 
@@ -518,7 +530,7 @@ document.getElementById('logForm').addEventListener('submit', async function(e) 
         <b>ประเภทรถ:</b> ${payload.vehicleWheels}<br>
         <b>ทะเบียนรถ:</b> ${payload.licensePlate}<br>
         <b>ทะเบียนพ่วง:</b> ${payload.trailerRear}<br>
-        <b>สิ่งที่ขนส่ง:</b> ${displayCargo}<br>
+        <b>ประเภทสัตว์:</b> ${displayCargo}<br>
         <b>เส้นทาง:</b> ${payload.originProvince} ➔ ${payload.destinationProvince}<br>
         <b>ผู้บันทึก:</b> ${payload.operatorName}
       </div>
