@@ -10,6 +10,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
+<!-- โหลด config แยก -->
+<script src="config.js"></script>
+
 <script>
   tailwind.config = {
     theme: {
@@ -35,33 +38,22 @@
   ::-webkit-scrollbar { width: 8px; }
   ::-webkit-scrollbar-thumb { background: #94A3B8; border-radius: 8px; }
 
-  .chip {
-    transition: all .15s ease;
-  }
+  .chip { transition: all .15s ease; }
   .chip.active {
-    background-color: #0B4A8F;
-    color: #fff;
-    border-color: #0B4A8F;
+    background-color: #0B4A8F; color: #fff; border-color: #0B4A8F;
     box-shadow: 0 2px 8px rgba(11,74,143,.35);
   }
-  .toggle-side.active-up {
-    background-color: #0B4A8F;
-    color: #fff;
+  .toggle-side.active-up { background-color: #0B4A8F; color: #fff; }
+  .toggle-side.active-down { background-color: #2E8BC0; color: #fff; }
+  .result-btn.active-ok { background-color: #1E8E5A; color: #fff; border-color: #1E8E5A; }
+  .result-btn.active-no { background-color: #DC2626; color: #fff; border-color: #DC2626; }
+  
+  .tab-btn.active {
+    border-bottom: 3px solid #0B4A8F;
+    color: #0B4A8F;
+    font-weight: bold;
   }
-  .toggle-side.active-down {
-    background-color: #2E8BC0;
-    color: #fff;
-  }
-  .result-btn.active-ok {
-    background-color: #1E8E5A;
-    color: #fff;
-    border-color: #1E8E5A;
-  }
-  .result-btn.active-no {
-    background-color: #DC2626;
-    color: #fff;
-    border-color: #DC2626;
-  }
+
   .spinner {
     border: 3px solid rgba(255,255,255,.4);
     border-top-color: #fff;
@@ -71,7 +63,10 @@
   }
   @keyframes spin { to { transform: rotate(360deg); } }
 
-  input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(30%) sepia(70%) saturate(1000%) hue-rotate(180deg); }
+  input[type="date"]::-webkit-calendar-picker-indicator,
+  input[type="time"]::-webkit-calendar-picker-indicator {
+    filter: invert(30%) sepia(70%) saturate(1000%) hue-rotate(180deg);
+  }
 </style>
 </head>
 
@@ -111,7 +106,7 @@
         class="flex-1 border border-slate-300 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-gov-sky">
       <button id="btnSaveUrl" class="bg-gov-blue text-white font-semibold rounded-xl px-5 py-3 text-sm hover:bg-gov-blueDark">บันทึก URL</button>
     </div>
-    <p class="text-xs text-gov-gray mt-2">คัดลอก URL ที่ได้จากการ Deploy Google Apps Script (Web App) มาวางที่นี่ ระบบจะจดจำไว้ในเครื่องนี้</p>
+    <p class="text-xs text-gov-gray mt-2">คัดลอก URL ที่ได้จากการ Deploy Google Apps Script (Web App) มาวางที่นี่</p>
   </div>
 </div>
 
@@ -133,15 +128,22 @@
       <input type="hidden" id="checkpointSide" value="" required>
     </div>
 
-    <!-- วันที่ -->
+    <!-- วันที่และเวลาปฏิบัติงาน -->
     <div>
-      <label class="block text-sm font-bold text-gov-blueDark mb-2">วันที่ปฏิบัติงาน <span class="text-red-500">*</span></label>
-      <div class="flex gap-2">
-        <input type="date" id="operationDate" required
-          class="flex-1 border border-slate-300 rounded-xl px-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-gov-sky">
-        <button type="button" id="btnToday" class="bg-gov-green text-white font-semibold rounded-xl px-4 py-3 text-sm whitespace-nowrap hover:opacity-90">วันนี้</button>
+      <label class="block text-sm font-bold text-gov-blueDark mb-2">วันที่และเวลาปฏิบัติงาน <span class="text-red-500">*</span></label>
+      <div class="grid sm:grid-cols-2 gap-2">
+        <div class="flex gap-2">
+          <input type="date" id="operationDate" required
+            class="flex-1 border border-slate-300 rounded-xl px-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-gov-sky">
+          <button type="button" id="btnToday" class="bg-gov-green text-white font-semibold rounded-xl px-3 py-3 text-sm whitespace-nowrap hover:opacity-90">วันนี้</button>
+        </div>
+        <div class="flex gap-2">
+          <input type="text" id="operationTime" required placeholder="HH:mm (เช่น 23:07)" pattern="^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$"
+            class="flex-1 border border-slate-300 rounded-xl px-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-gov-sky">
+          <button type="button" id="btnNowTime" class="bg-gov-sky text-white font-semibold rounded-xl px-3 py-3 text-sm whitespace-nowrap hover:opacity-90">ตอนนี้</button>
+        </div>
       </div>
-      <p class="text-xs text-gov-gray mt-1">เวลาบันทึกจะถูกดึงอัตโนมัติจากขณะที่กด "บันทึกข้อมูล"</p>
+      <p class="text-xs text-gov-gray mt-1">สามารถเลือกเวลาลงย้อนหลังได้ หากไม่ได้เปลี่ยนจะใช้วันและเวลาปัจจุบัน</p>
     </div>
 
     <!-- ประเภทรถ -->
@@ -151,16 +153,25 @@
       <input type="hidden" id="vehicleWheels" required>
     </div>
 
-    <!-- ทะเบียนรถ -->
-    <div class="grid sm:grid-cols-2 gap-4">
+    <!-- ทะเบียนรถ (ปรับตามแบบรูปที่ต้องการ) -->
+    <div class="space-y-4">
       <div>
-        <label class="block text-sm font-bold text-gov-blueDark mb-2">ทะเบียนรถ <span class="text-red-500">*</span></label>
+        <label class="block text-sm font-bold text-gov-blueDark mb-1">ทะเบียนรถ <span class="text-red-500">*</span></label>
         <input type="text" id="licensePlate" required placeholder="เช่น 80-1234"
-          class="w-full border border-slate-300 rounded-xl px-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-gov-sky">
-      </div>
-      <div>
-        <label class="block text-sm font-bold text-gov-blueDark mb-2">จังหวัดทะเบียนรถ <span class="text-red-500">*</span></label>
+          class="w-full border border-slate-300 rounded-xl px-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-gov-sky mb-3">
+        
+        <label class="block text-sm font-bold text-gov-blueDark mb-1">จังหวัดทะเบียนรถ <span class="text-red-500">*</span></label>
         <select id="licenseProvince" required
+          class="w-full border border-slate-300 rounded-xl px-4 py-3 text-base bg-white focus:outline-none focus:ring-2 focus:ring-gov-sky"></select>
+      </div>
+
+      <!-- ทะเบียนพ่วงหลัง (เปลี่ยนจากพ่วงหน้าเป็นพ่วงหลังเลย) -->
+      <div class="bg-slate-50 rounded-2xl border border-slate-200 p-4">
+        <label class="block text-sm font-bold text-gov-blueDark mb-1">ทะเบียนพ่วงหลัง <span class="text-xs font-normal text-gov-gray">(ถ้ามี)</span></label>
+        <input type="text" id="trailerRearPlate" placeholder="เช่น 80-5678"
+          class="w-full border border-slate-300 rounded-xl px-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-gov-sky mb-3">
+        
+        <select id="trailerRearProvince"
           class="w-full border border-slate-300 rounded-xl px-4 py-3 text-base bg-white focus:outline-none focus:ring-2 focus:ring-gov-sky"></select>
       </div>
     </div>
@@ -225,26 +236,33 @@
     </button>
   </form>
 
-  <!-- ประวัติล่าสุด -->
+  <!-- ประวัติล่าสุด ดึงจาก Google Sheets Direct -->
   <section class="mt-8 mb-4">
     <div class="flex items-center justify-between mb-3">
-      <h2 class="text-base font-bold text-gov-blueDark">ประวัติการบันทึกล่าสุด (ในเครื่องนี้)</h2>
-      <button id="btnClearHistory" class="text-xs text-red-500 font-semibold hover:underline">ล้างประวัติ</button>
+      <h2 class="text-base font-bold text-gov-blueDark">ประวัติการบันทึกล่าสุด (จาก Google Sheets)</h2>
+      <button id="btnRefreshHistory" class="text-xs bg-slate-200 text-gov-blueDark px-3 py-1.5 rounded-lg font-semibold hover:bg-slate-300">🔄 รีเฟรชข้อมูล</button>
     </div>
+
+    <!-- Tabs สลับ ขาขึ้น / ขาล่อง -->
+    <div class="flex border-b border-slate-200 mb-2">
+      <button type="button" class="tab-btn active px-4 py-2 font-semibold text-sm" onclick="switchTab('ขาขึ้น')">⬆️ ฝั่งขาขึ้น</button>
+      <button type="button" class="tab-btn px-4 py-2 font-semibold text-sm text-slate-500" onclick="switchTab('ขาล่อง')">⬇️ ฝั่งขาล่อง</button>
+    </div>
+
     <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-x-auto">
       <table class="w-full text-sm min-w-[640px]">
         <thead class="bg-slate-100 text-gov-blueDark">
           <tr>
-            <th class="text-left px-3 py-2 font-semibold">เวลาบันทึก</th>
-            <th class="text-left px-3 py-2 font-semibold">ฝั่งด่าน</th>
+            <th class="text-left px-3 py-2 font-semibold">เวลาปฏิบัติงาน</th>
             <th class="text-left px-3 py-2 font-semibold">ทะเบียนรถ</th>
             <th class="text-left px-3 py-2 font-semibold">สิ่งที่ขนส่ง</th>
             <th class="text-left px-3 py-2 font-semibold">ผลการพ่นน้ำยา</th>
+            <th class="text-center px-3 py-2 font-semibold">สถานะระบบ</th>
           </tr>
         </thead>
         <tbody id="historyBody" class="divide-y divide-slate-100"></tbody>
       </table>
-      <p id="historyEmpty" class="text-center text-gov-gray text-sm py-6">ยังไม่มีประวัติการบันทึก</p>
+      <p id="historyEmpty" class="text-center text-gov-gray text-sm py-6">กำลังโหลดข้อมูลประวัติ...</p>
     </div>
   </section>
 </main>
@@ -267,21 +285,23 @@ const PROVINCES = [
   "อุดรธานี","อุตรดิตถ์","อุทัยธานี","อุบลราชธานี"
 ];
 const WHEEL_OPTIONS = [4,6,8,10,12,18,20,22,24];
-const HISTORY_KEY = 'qav_history_v1';
 const URL_KEY = 'qav_webapp_url';
+let sheetDataStore = [];
+let currentTab = 'ขาขึ้น';
 
-// URL ที่ได้จากการ Deploy Google Apps Script (Web App) — ฝังไว้ในไฟล์เลย
-// เครื่อง/เบราว์เซอร์ใหม่ที่เข้ามาจะใช้ค่านี้ได้ทันทีโดยไม่ต้องตั้งค่าเอง
-const DEFAULT_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbyBM9eBIW-EExX7SdqhQkGi4VsYUXw1tlAe7jPIK0IOCAOIbuC9EF6XFR931bwN673K/exec';
-
-/* ============ Populate dropdowns ============ */
-function fillProvinceSelect(sel, defaultValue) {
-  sel.innerHTML = '<option value="">-- เลือกจังหวัด --</option>' +
+/* ============ Dropdowns & Form Setup ============ */
+const NO_TRAILER = 'ไม่มีพ่วง';
+function fillProvinceSelect(sel, defaultValue, isTrailer) {
+  const placeholder = isTrailer
+    ? `<option value="${NO_TRAILER}" selected>( ไม่มีพ่วง )</option>`
+    : '<option value="">-- เลือกจังหวัด --</option>';
+  sel.innerHTML = placeholder +
     PROVINCES.map(p => `<option value="${p}" ${p === defaultValue ? 'selected' : ''}>${p}</option>`).join('');
 }
 fillProvinceSelect(document.getElementById('licenseProvince'), 'นครสวรรค์');
 fillProvinceSelect(document.getElementById('originProvince'), '');
 fillProvinceSelect(document.getElementById('destinationProvince'), '');
+fillProvinceSelect(document.getElementById('trailerRearProvince'), '', true);
 
 const wheelChipsEl = document.getElementById('wheelChips');
 WHEEL_OPTIONS.forEach(w => {
@@ -289,7 +309,6 @@ WHEEL_OPTIONS.forEach(w => {
   btn.type = 'button';
   btn.className = 'chip border-2 border-slate-300 text-slate-600 rounded-xl px-4 py-2.5 font-semibold text-sm';
   btn.textContent = w + ' ล้อ';
-  btn.dataset.wheel = w;
   btn.addEventListener('click', () => {
     document.querySelectorAll('#wheelChips .chip').forEach(c => c.classList.remove('active'));
     btn.classList.add('active');
@@ -298,16 +317,19 @@ WHEEL_OPTIONS.forEach(w => {
   wheelChipsEl.appendChild(btn);
 });
 
-/* ============ วันที่ default = วันนี้ ============ */
-function setToday() {
+/* ============ วันที่ / เวลา Default ============ */
+function setNow() {
   const d = new Date();
-  const iso = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
-  document.getElementById('operationDate').value = iso;
+  const isoDate = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+  const isoTime = String(d.getHours()).padStart(2,'0') + ':' + String(d.getMinutes()).padStart(2,'0');
+  document.getElementById('operationDate').value = isoDate;
+  document.getElementById('operationTime').value = isoTime;
 }
-setToday();
-document.getElementById('btnToday').addEventListener('click', setToday);
+setNow();
+document.getElementById('btnToday').addEventListener('click', setNow);
+document.getElementById('btnNowTime').addEventListener('click', setNow);
 
-/* ============ Toggle: ฝั่งด่าน ============ */
+/* ============ Toggle Side & Result ============ */
 document.querySelectorAll('.toggle-side').forEach(btn => {
   btn.addEventListener('click', () => {
     document.querySelectorAll('.toggle-side').forEach(b => b.classList.remove('active-up','active-down'));
@@ -317,7 +339,6 @@ document.querySelectorAll('.toggle-side').forEach(btn => {
   });
 });
 
-/* ============ Toggle: ผลการพ่นน้ำยา ============ */
 document.querySelectorAll('.result-btn').forEach(btn => {
   btn.addEventListener('click', () => {
     document.querySelectorAll('.result-btn').forEach(b => b.classList.remove('active-ok','active-no'));
@@ -327,7 +348,7 @@ document.querySelectorAll('.result-btn').forEach(btn => {
   });
 });
 
-/* ============ สิ่งที่ขนส่ง: อื่นๆ ============ */
+/* ============ Cargo type select ============ */
 const cargoSelect = document.getElementById('cargoType');
 const cargoOther = document.getElementById('cargoTypeOther');
 cargoSelect.addEventListener('change', () => {
@@ -341,108 +362,159 @@ cargoSelect.addEventListener('change', () => {
   }
 });
 
-/* ============ Settings panel: Web App URL ============ */
+/* ============ Settings Panel & URL Security ============ */
 const settingsPanel = document.getElementById('settingsPanel');
 const webAppUrlInput = document.getElementById('webAppUrl');
+
 document.getElementById('btnSettings').addEventListener('click', () => {
   Swal.fire({
     icon: 'warning',
-    title: 'ส่วนนี้สำหรับผู้พัฒนาระบบเท่านั้น',
-    text: 'การแก้ไข Web App URL มีผลต่อการบันทึกข้อมูลของทุกคนที่ใช้ระบบนี้ กรุณาดำเนินการต่อเฉพาะกรณีที่ท่านเป็นผู้ดูแล/ผู้พัฒนาระบบเท่านั้น',
+    title: 'ส่วนสำหรับผู้พัฒนาระบบ',
+    text: 'การแก้ไข Web App URL มีผลต่อการทำงานทั้งระบบ',
     showCancelButton: true,
-    confirmButtonText: 'ฉันเป็นผู้พัฒนา ดำเนินการต่อ',
+    confirmButtonText: 'ดำเนินการต่อ',
     cancelButtonText: 'ยกเลิก',
     confirmButtonColor: '#0B4A8F'
   }).then(res => {
-    if (res.isConfirmed) {
-      settingsPanel.classList.toggle('hidden');
-    }
+    if (!res.isConfirmed) return;
+    Swal.fire({
+      icon: 'question',
+      title: 'กรุณากรอกรหัสผ่านผู้ดูแลระบบ',
+      input: 'password',
+      showCancelButton: true,
+      confirmButtonText: 'ยืนยัน',
+      confirmButtonColor: '#0B4A8F',
+      inputValidator: (val) => { if (!val) return 'กรุณากรอกรหัสผ่าน'; }
+    }).then(res2 => {
+      if (res2.isConfirmed) {
+        if (res2.value === CONFIG.DEV_PASSCODE) {
+          settingsPanel.classList.toggle('hidden');
+        } else {
+          Swal.fire({ icon: 'error', title: 'รหัสผ่านไม่ถูกต้อง', timer: 1800, showConfirmButton: false });
+        }
+      }
+    });
   });
 });
+
 document.getElementById('btnSaveUrl').addEventListener('click', () => {
   const url = webAppUrlInput.value.trim();
-  if (!url) { return; }
-  localStorage.setItem(URL_KEY, url);
-  Swal.fire({ icon: 'success', title: 'บันทึก URL แล้ว', timer: 1400, showConfirmButton: false });
-  settingsPanel.classList.add('hidden');
+  if (url) {
+    localStorage.setItem(URL_KEY, url);
+    Swal.fire({ icon: 'success', title: 'บันทึก URL แล้ว', timer: 1400, showConfirmButton: false });
+    settingsPanel.classList.add('hidden');
+    fetchSheetHistory();
+  }
 });
+
 (function loadSavedUrl(){
   const saved = localStorage.getItem(URL_KEY);
-  webAppUrlInput.value = saved || DEFAULT_WEB_APP_URL;
-  // settingsPanel ซ่อนอยู่โดย default แล้ว (เข้าเว็บมากรอกข้อมูลได้เลย)
-  // กดไอคอนเฟืองมุมขวาบนได้ทุกเมื่อ หากต้องการเปลี่ยน Web App URL ในอนาคต
+  webAppUrlInput.value = saved || CONFIG.DEFAULT_WEB_APP_URL;
 })();
 
-/* ============ ประวัติล่าสุด (localStorage) ============ */
-function loadHistory() {
-  try { return JSON.parse(localStorage.getItem(HISTORY_KEY)) || []; }
-  catch (e) { return []; }
+/* ============ Fetch ประวัติจาก Google Sheets Directly ============ */
+async function fetchSheetHistory() {
+  const url = localStorage.getItem(URL_KEY) || CONFIG.DEFAULT_WEB_APP_URL;
+  const empty = document.getElementById('historyEmpty');
+  empty.textContent = 'กำลังโหลดข้อมูลจาก Google Sheets...';
+  empty.classList.remove('hidden');
+
+  try {
+    const res = await fetch(url + '?action=getHistory');
+    const data = await res.json();
+    if (data.status === 'success') {
+      sheetDataStore = data.data;
+      renderHistoryTabs();
+    } else {
+      empty.textContent = 'ไม่สามารถดึงข้อมูลได้';
+    }
+  } catch (e) {
+    empty.textContent = 'เกิดข้อผิดพลาดในการดึงข้อมูลจาก Sheets';
+  }
 }
-function saveHistory(list) {
-  localStorage.setItem(HISTORY_KEY, JSON.stringify(list.slice(0, 20)));
+
+function switchTab(side) {
+  currentTab = side;
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    if (btn.textContent.includes(side)) {
+      btn.classList.add('active', 'text-gov-blue');
+      btn.classList.remove('text-slate-500');
+    } else {
+      btn.classList.remove('active', 'text-gov-blue');
+      btn.classList.add('text-slate-500');
+    }
+  });
+  renderHistoryTabs();
 }
-function renderHistory() {
-  const list = loadHistory();
+
+function renderHistoryTabs() {
   const body = document.getElementById('historyBody');
   const empty = document.getElementById('historyEmpty');
   body.innerHTML = '';
-  if (list.length === 0) {
+
+  const filtered = sheetDataStore.filter(item => item.checkpointSide === currentTab);
+
+  if (filtered.length === 0) {
+    empty.textContent = `ยังไม่มีประวัติการบันทึกฝั่ง (${currentTab})`;
     empty.classList.remove('hidden');
     return;
   }
   empty.classList.add('hidden');
-  list.forEach(item => {
+
+  filtered.slice(0, 15).forEach(item => {
     const tr = document.createElement('tr');
+    const statusBadge = item.status === 'ลงระบบแล้ว' 
+      ? `<span class="bg-green-100 text-green-700 text-xs px-2.5 py-1 rounded-full font-bold">✓ ลงระบบแล้ว</span>`
+      : `<span class="bg-yellow-100 text-yellow-700 text-xs px-2.5 py-1 rounded-full font-bold">⏳ รอดำเนินการ</span>`;
+
     tr.innerHTML = `
-      <td class="px-3 py-2 whitespace-nowrap text-gov-gray">${item.timestamp}</td>
-      <td class="px-3 py-2 whitespace-nowrap">${item.checkpointSide}</td>
-      <td class="px-3 py-2 whitespace-nowrap font-medium">${item.licensePlate}</td>
-      <td class="px-3 py-2 whitespace-nowrap">${item.cargoType}</td>
-      <td class="px-3 py-2 whitespace-nowrap">${item.disinfectionResult}</td>
+      <td class="px-3 py-2.5 whitespace-nowrap text-gov-gray">${item.opDateTime}</td>
+      <td class="px-3 py-2.5 whitespace-nowrap font-medium text-slate-800">${item.licensePlate}</td>
+      <td class="px-3 py-2.5 whitespace-nowrap">${item.cargoType}</td>
+      <td class="px-3 py-2.5 whitespace-nowrap">${item.disinfectionResult}</td>
+      <td class="px-3 py-2.5 whitespace-nowrap text-center">${statusBadge}</td>
     `;
     body.appendChild(tr);
   });
 }
-renderHistory();
-document.getElementById('btnClearHistory').addEventListener('click', () => {
-  Swal.fire({
-    icon: 'warning', title: 'ล้างประวัติในเครื่องนี้?', showCancelButton: true,
-    confirmButtonText: 'ล้างประวัติ', cancelButtonText: 'ยกเลิก', confirmButtonColor: '#DC2626'
-  }).then(res => {
-    if (res.isConfirmed) { saveHistory([]); renderHistory(); }
-  });
-});
 
-/* ============ Submit form ============ */
+document.getElementById('btnRefreshHistory').addEventListener('click', fetchSheetHistory);
+
+/* ============ Submit Form ============ */
 document.getElementById('logForm').addEventListener('submit', async function(e) {
   e.preventDefault();
 
-  const webAppUrl = localStorage.getItem(URL_KEY) || DEFAULT_WEB_APP_URL;
-  if (!webAppUrl) {
-    Swal.fire({ icon: 'error', title: 'ยังไม่ได้ตั้งค่า Web App URL', text: 'กรุณากดปุ่มตั้งค่า (มุมขวาบน) เพื่อใส่ลิงก์ Google Apps Script ก่อน' });
-    settingsPanel.classList.remove('hidden');
-    return;
-  }
+  const webAppUrl = localStorage.getItem(URL_KEY) || CONFIG.DEFAULT_WEB_APP_URL;
 
   if (!document.getElementById('checkpointSide').value) {
-    Swal.fire({ icon: 'warning', title: 'กรุณาเลือกฝั่งด่านกักกัน (ขาขึ้น / ขาล่อง)' }); return;
+    Swal.fire({ icon: 'warning', title: 'กรุณาเลือกฝั่งด่านกักกัน' }); return;
   }
   if (!document.getElementById('vehicleWheels').value) {
-    Swal.fire({ icon: 'warning', title: 'กรุณาเลือกประเภทรถ (จำนวนล้อ)' }); return;
+    Swal.fire({ icon: 'warning', title: 'กรุณาเลือกประเภทรถ' }); return;
   }
   if (!document.getElementById('disinfectionResult').value) {
-    Swal.fire({ icon: 'warning', title: 'กรุณาเลือกผลการพ่นน้ำยาฆ่าเชื้อ' }); return;
+    Swal.fire({ icon: 'warning', title: 'กรุณาเลือกผลการพ่นน้ำยา' }); return;
   }
 
-  const now = new Date();
-  const timeStr = now.toLocaleString('th-TH', { hour12: false });
+  function combinePlateProvince(plate, province) {
+    const p = (plate || '').trim();
+    if (!p || !province || province === NO_TRAILER) return NO_TRAILER;
+    return `${p} ${province}`;
+  }
+
+  const rawLicensePlate = document.getElementById('licensePlate').value.trim();
+  const rawLicenseProvince = document.getElementById('licenseProvince').value;
+  const rawTrailerRearPlate = document.getElementById('trailerRearPlate').value.trim();
+  const rawTrailerRearProvince = document.getElementById('trailerRearProvince').value;
 
   const payload = {
     checkpointSide: document.getElementById('checkpointSide').value,
     operationDate: document.getElementById('operationDate').value,
+    operationTime: document.getElementById('operationTime').value,
     vehicleWheels: document.getElementById('vehicleWheels').value + ' ล้อ',
-    licensePlate: document.getElementById('licensePlate').value.trim(),
-    licenseProvince: document.getElementById('licenseProvince').value,
+    licensePlate: `${rawLicensePlate} ${rawLicenseProvince}`.trim(),
+    trailerFront: NO_TRAILER,
+    trailerRear: combinePlateProvince(rawTrailerRearPlate, rawTrailerRearProvince),
     cargoType: cargoSelect.value,
     cargoTypeOther: cargoOther.value.trim(),
     originProvince: document.getElementById('originProvince').value,
@@ -451,86 +523,52 @@ document.getElementById('logForm').addEventListener('submit', async function(e) 
     operatorName: document.getElementById('operatorName').value.trim()
   };
 
-  const cargoDisplay = payload.cargoType === 'อื่นๆ' ? ('อื่นๆ: ' + payload.cargoTypeOther) : payload.cargoType;
-  const resultColor = payload.disinfectionResult === 'พ่นครบตามแผน' ? '#1E8E5A' : '#DC2626';
-
-  const summaryHtml = `
-    <div style="text-align:left;font-size:14px;line-height:1.9">
-      <div><b>ฝั่งด่าน:</b> ${payload.checkpointSide}</div>
-      <div><b>วันที่ปฏิบัติงาน:</b> ${payload.operationDate}</div>
-      <div><b>ประเภทรถ:</b> ${payload.vehicleWheels}</div>
-      <div><b>ทะเบียนรถ:</b> ${payload.licensePlate} (${payload.licenseProvince})</div>
-      <div><b>สิ่งที่ขนส่ง:</b> ${cargoDisplay}</div>
-      <div><b>ต้นทาง → ปลายทาง:</b> ${payload.originProvince} → ${payload.destinationProvince}</div>
-      <div><b>ผลการพ่นน้ำยา:</b> <span style="color:${resultColor};font-weight:700">${payload.disinfectionResult}</span></div>
-      <div><b>ผู้ปฏิบัติงาน:</b> ${payload.operatorName}</div>
-    </div>
-  `;
-
   const confirmRes = await Swal.fire({
     icon: 'question',
-    title: 'กรุณาตรวจสอบข้อมูลก่อนบันทึก',
-    html: summaryHtml,
+    title: 'ยืนยันบันทึกข้อมูล',
+    html: `
+      <div style="text-align:left;font-size:14px;line-height:1.8">
+        <b>ฝั่ง:</b> ${payload.checkpointSide}<br>
+        <b>วันที่-เวลา:</b> ${payload.operationDate} (${payload.operationTime})<br>
+        <b>ทะเบียน:</b> ${payload.licensePlate}<br>
+        <b>พ่วงหลัง:</b> ${payload.trailerRear}<br>
+        <b>สิ่งที่ขนส่ง:</b> ${payload.cargoType === 'อื่นๆ' ? payload.cargoTypeOther : payload.cargoType}
+      </div>
+    `,
     showCancelButton: true,
-    confirmButtonText: 'ข้อมูลถูกต้อง ยืนยันบันทึก',
-    cancelButtonText: 'ตรวจสอบอีกครั้ง',
-    confirmButtonColor: '#0B4A8F',
-    cancelButtonColor: '#64748B',
-    reverseButtons: true
+    confirmButtonText: 'บันทึกข้อมูล',
+    cancelButtonText: 'แก้ไข',
+    confirmButtonColor: '#0B4A8F'
   });
 
-  if (!confirmRes.isConfirmed) {
-    return;
-  }
+  if (!confirmRes.isConfirmed) return;
 
   const btnSubmit = document.getElementById('btnSubmit');
   const btnText = document.getElementById('btnSubmitText');
   btnSubmit.disabled = true;
-  btnSubmit.classList.add('opacity-70');
-  btnText.innerHTML = '';
-  const spinner = document.createElement('span');
-  spinner.className = 'spinner';
-  btnText.appendChild(spinner);
-  btnText.append(' กำลังบันทึก...');
+  btnText.textContent = 'กำลังบันทึก...';
 
   try {
-    // ใช้ text/plain เพื่อเลี่ยงปัญหา CORS preflight กับ Google Apps Script
     await fetch(webAppUrl, {
       method: 'POST',
       headers: { 'Content-Type': 'text/plain;charset=utf-8' },
       body: JSON.stringify(payload)
     });
 
-    const historyItem = {
-      timestamp: timeStr,
-      checkpointSide: payload.checkpointSide,
-      licensePlate: payload.licensePlate,
-      cargoType: payload.cargoType === 'อื่นๆ' ? ('อื่นๆ: ' + payload.cargoTypeOther) : payload.cargoType,
-      disinfectionResult: payload.disinfectionResult
-    };
-    const list = loadHistory();
-    list.unshift(historyItem);
-    saveHistory(list);
-    renderHistory();
-
-    await Swal.fire({
-      icon: 'success', title: 'บันทึกข้อมูลสำเร็จ', timer: 1800, showConfirmButton: false
-    });
-
+    await Swal.fire({ icon: 'success', title: 'บันทึกเรียบร้อย', timer: 1500, showConfirmButton: false });
     resetForm();
-
+    fetchSheetHistory();
   } catch (err) {
-    Swal.fire({ icon: 'error', title: 'บันทึกไม่สำเร็จ', text: 'กรุณาตรวจสอบการเชื่อมต่ออินเทอร์เน็ต หรือ Web App URL แล้วลองใหม่อีกครั้ง' });
+    Swal.fire({ icon: 'error', title: 'เกิดข้อผิดพลาดในการบันทึก' });
   } finally {
     btnSubmit.disabled = false;
-    btnSubmit.classList.remove('opacity-70');
     btnText.textContent = 'บันทึกข้อมูล';
   }
 });
 
 function resetForm() {
   document.getElementById('logForm').reset();
-  setToday();
+  setNow();
   document.querySelectorAll('#wheelChips .chip').forEach(c => c.classList.remove('active'));
   document.getElementById('vehicleWheels').value = '';
   document.querySelectorAll('.result-btn').forEach(b => b.classList.remove('active-ok','active-no'));
@@ -538,9 +576,12 @@ function resetForm() {
   document.querySelectorAll('.toggle-side').forEach(b => b.classList.remove('active-up','active-down'));
   document.getElementById('checkpointSide').value = '';
   fillProvinceSelect(document.getElementById('licenseProvince'), 'นครสวรรค์');
+  fillProvinceSelect(document.getElementById('trailerRearProvince'), '', true);
   cargoOther.classList.add('hidden');
-  cargoOther.required = false;
 }
+
+// โหลดข้อมูลจาก Google Sheets ทันทีเมื่อเปิดหน้า
+fetchSheetHistory();
 </script>
 </body>
 </html>
