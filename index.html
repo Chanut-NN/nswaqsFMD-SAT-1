@@ -509,6 +509,28 @@ document.getElementById('logForm').addEventListener('submit', async function(e) 
     Swal.fire({ icon: 'warning', title: 'กรุณาเลือกผลการพ่นน้ำยา' }); return;
   }
 
+  // --- ตรวจสอบการลงข้อมูลย้อนหลัง (ถ้าเวลาย้อนหลังเกิน 5 นาที) ---
+  const inputDate = document.getElementById('operationDate').value;
+  const inputTime = document.getElementById('operationTime').value;
+
+  const selectedDateTime = new Date(`${inputDate}T${inputTime}`);
+  const now = new Date();
+  const diffMinutes = (now - selectedDateTime) / (1000 * 60);
+
+  if (diffMinutes > 5) {
+    const confirmBacklog = await Swal.fire({
+      icon: 'warning',
+      title: 'แจ้งเตือนการบันทึกย้อนหลัง',
+      text: `คุณกำลังลงข้อมูลย้อนหลัง (${inputDate} เวลา ${inputTime}) ต้องการบันทึกข้อมูลนี้ใช่หรือไม่?`,
+      showCancelButton: true,
+      confirmButtonText: 'ใช่, บันทึกย้อนหลัง',
+      cancelButtonText: 'แก้ไขเวลา',
+      confirmButtonColor: '#d97706'
+    });
+
+    if (!confirmBacklog.isConfirmed) return;
+  }
+
   function combinePlateProvince(plate, province) {
     const p = (plate || '').trim();
     if (!p || !province || province === NO_TRAILER) return NO_TRAILER;
@@ -522,8 +544,8 @@ document.getElementById('logForm').addEventListener('submit', async function(e) 
 
   const payload = {
     checkpointSide: document.getElementById('checkpointSide').value,
-    operationDate: document.getElementById('operationDate').value,
-    operationTime: document.getElementById('operationTime').value,
+    operationDate: inputDate,
+    operationTime: inputTime,
     vehicleWheels: document.getElementById('vehicleWheels').value + ' ล้อ',
     licensePlate: `${rawLicensePlate} ${rawLicenseProvince}`.trim(),
     trailerRear: combinePlateProvince(rawTrailerRearPlate, rawTrailerRearProvince),
